@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
-    user_id: { type: String, required: true, unique: true }, // Customer ID
     user_name: { type: String, required: true }, // Customer name
     user_password: { type: String, required: true }, // Password
     user_avt_img: { type: String }, // Avatar image
