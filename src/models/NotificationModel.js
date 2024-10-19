@@ -2,11 +2,9 @@ const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema(
   {
-    notification_id: { Type: Number, required: true},
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    type: { type: String, enum: ['message', 'alert', 'update'], required: true },
+    type: { type: String, enum: ['Tin nhắn', 'Khuyến mãi', 'Tình trạng đơn hàng', 'Tài khoản'], required: true },
     content: { type: String, required: true },
-    notification_img: { type: String }, // Mảng chứa nhiều hình ảnh
     isRead: { type: Boolean, default: false }
   },
   {

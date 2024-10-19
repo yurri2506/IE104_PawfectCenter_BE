@@ -15,7 +15,9 @@ const orderSchema = new mongoose.Schema(
     },
     shipping_address: {
       fullname: { type: String, required: true }, // Tên đầy đủ
+      phone: { type: String, required: true }, // Số điện thoại
       address: {
+        home_number: {type: Number},// số nhà
         province: { type: String, required: true }, // Tỉnh
         district: { type: String, required: true }, // Huyện
         commune: { type: String, required: true } // Xã
@@ -25,23 +27,24 @@ const orderSchema = new mongoose.Schema(
     products: [
       {
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true }, // ID sản phẩm
-        quantity: { type: Number, required: true }, // Số lượng sản phẩm
+        quantity: { type: Number, required: true, default: 1}, // Số lượng sản phẩm
+        model: {type: String},
         status: { 
           type: String, 
-          enum: ['pending', 'shipped', 'delivered', 'returned'], 
-          default: 'pending' // Trạng thái của từng sản phẩm
+          enum: ['Giao hàng thành công', 'Hoàn hàng'], 
         }
       }
     ],
     order_status: { 
       type: String, 
-      enum: ['pending', 'completed', 'canceled'], 
-      required: true // Trạng thái đơn hàng, bắt buộc 
+      enum: ['Chờ xác nhận','Đang chuẩn bị hàng', 'Đang giao', 'Giao hàng thành công', 'Hoàn hàng'], 
+      default: 'Chờ xác nhận' // Trạng thái của từng sản phẩm
     },
     order_payment: { 
       type: String, 
       enum: ['credit_card', 'paypal', 'cod'], 
-      required: true // Hình thức thanh toán, bắt buộc 
+      required: true, // Hình thức thanh toán, bắt buộc 
+      default: 'cod'
     },
     order_delivery_date: { 
       type: Date // Ngày giao hàng 

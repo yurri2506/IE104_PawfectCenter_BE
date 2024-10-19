@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 const feedbackSchema = new mongoose.Schema(
   {
-    feedback_id: { Type: Number, required: true},
     product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+    order_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true },
     feedback_img: { type: [String] }, // Mảng chứa nhiều hình ảnh
