@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema(
   {
-    order_id: { Type: Number, required: true},
     discount_ids: [{ 
       type: mongoose.Schema.Types.ObjectId, // Sử dụng ObjectId để tham chiếu đến collection Discount
       ref: 'Discount', // Tham chiếu đến collection Discount

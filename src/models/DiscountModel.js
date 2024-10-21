@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const discountSchema = new mongoose.Schema(
   {
-    discount_id: { Type: Number, required: true},
     name: { type: String, required: true },
     discount_type: { type: String, enum: ['shipping', 'voucher'], required: true },
     description: { type: String },
