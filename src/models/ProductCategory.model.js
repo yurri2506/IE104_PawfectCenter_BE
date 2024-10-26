@@ -11,6 +11,11 @@ const CategorySchema = new mongoose.Schema(
       ref: "Category",
       default: null, 
     },
+    slug: { 
+      type: String, 
+      slug: "title",  //San pham 1 
+      unique: true
+    },
     category_level: {
       type: Number,
       required: true,

@@ -29,7 +29,11 @@ const productSchema = new mongoose.Schema(
     product_percent_discount: { type: Number }, 
     is_delete: { type: Boolean, default: false }, 
     variants: [variantSchema],
-    product_category: {}
+    slug: { 
+      type: String, 
+      slug: "title",  //San pham 1 
+      unique: true
+    },
   },
   {
     timestamps: true,
