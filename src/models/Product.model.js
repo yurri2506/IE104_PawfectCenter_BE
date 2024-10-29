@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const variantSchema = new mongoose.Schema(
   {
-    product_category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
     pet_age: {type: Number, required: true},
     product_color: { type: String },
     product_weight: { type: String }, 
@@ -17,6 +16,7 @@ const variantSchema = new mongoose.Schema(
 const productSchema = new mongoose.Schema(
   {
     product_title: { type: String, required: true },
+    product_category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
     product_img: { type: [String] }, 
     product_description: { type: String, required: true },
     product_display: { type: Boolean, required: true, default: false },
