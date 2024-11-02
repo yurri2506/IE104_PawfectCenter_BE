@@ -1,6 +1,8 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
 
+// Tạo sản phẩm
 const createProduct = (newProduct) => {
   return new Promise(async (resolve, reject) => {
     const {
@@ -15,7 +17,7 @@ const createProduct = (newProduct) => {
       product_selled,
       product_percent_discount,
       variants,
-      slug 
+      slug,
     } = newProduct;
 
     try {
@@ -47,7 +49,7 @@ const createProduct = (newProduct) => {
         product_selled,
         product_percent_discount,
         variants,
-        slug 
+        slug,
       };
 
       const newProductInstance = await Product.create(newProductData);
@@ -68,6 +70,44 @@ const createProduct = (newProduct) => {
   });
 };
 
+// Sửa sản phẩm
+const updateProduct = (id, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Kiểm tra ID có hợp lệ không
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return resolve({
+          status: "ERR",
+          message: "Invalid product ID",
+        });
+      }
+
+      // Kiểm tra sản phẩm có tồn tại không
+      const checkProduct = await Product.findOne({ _id: id });
+      if (!checkProduct) {
+        return resolve({
+          status: "ERR",
+          message: "The product is not defined",
+        });
+      }
+
+      // Cập nhật sản phẩm chỉ với các trường được cung cấp trong `data`
+      const updatedProduct = await Product.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+      return resolve({
+        status: "OK",
+        message: "SUCCESS",
+        data: updatedProduct,
+      });
+    } catch (e) {
+      reject({
+        status: "ERR",
+        message: e.message || "Error while updating the product",
+      });
+    }
+  });
+};
+
 module.exports = {
   createProduct,
+  updateProduct,
 };

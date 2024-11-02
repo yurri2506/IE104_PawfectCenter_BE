@@ -7,6 +7,11 @@ const crypto = require("crypto");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+const uploadFields = upload.fields([
+  { name: "product_images", maxCount: 10 },
+  { name: "variant_img_0", maxCount: 1 },
+]);
+
 const createProduct = async (req, res) => {
   try {
     const {
@@ -18,7 +23,7 @@ const createProduct = async (req, res) => {
       product_rate = 0,
       product_selled,
       product_percent_discount,
-      variants
+      variants,
     } = req.body;
 
     const slug = product_title
@@ -26,9 +31,10 @@ const createProduct = async (req, res) => {
       : crypto.randomBytes(6).toString("hex");
 
     // Chuyển đổi `product_images` từ file sang chuỗi Base64
-    const product_images = req.files['product_images']?.map((file) => {
-      return file.buffer.toString("base64");
-    }) || [];
+    const product_images =
+      req.files["product_images"]?.map((file) => {
+        return file.buffer.toString("base64");
+      }) || [];
 
     // Chuyển đổi `variant_img` cho từng biến thể
     const parsedVariants = JSON.parse(variants);
@@ -51,19 +57,35 @@ const createProduct = async (req, res) => {
       product_selled,
       product_percent_discount,
       variants: updatedVariants,
-      slug
+      slug,
     };
 
     const response = await ProductService.createProduct(newProductData);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Lỗi khi tạo sản phẩm" });
+    return res
+      .status(500)
+      .json({ message: error.message || "Lỗi khi tạo sản phẩm" });
   }
 };
 
-const uploadFields = upload.fields([
-  { name: "product_images", maxCount: 10 }, 
-  { name: "variant_img_0", maxCount: 1 },
-]);
+const updateProduct = async (req, res) => {
+  try {
+      const productId = req.params.id
+      const data = req.body
+      if (!productId) {
+          return res.status(200).json({
+              status: 'ERR',
+              message: 'The productId is required'
+          })
+      }
+      const response = await ProductService.updateProduct(productId, data)
+      return res.status(200).json(response)
+  } catch (e) {
+      return res.status(404).json({
+          message: e
+      })
+  }
+}
 
-module.exports = { createProduct, uploadFields };
+module.exports = { createProduct, uploadFields,updateProduct};
