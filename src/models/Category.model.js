@@ -28,6 +28,7 @@ const CategorySchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: 'Category'
   }
 );
 

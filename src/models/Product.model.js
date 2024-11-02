@@ -6,7 +6,7 @@ const variantSchema = new mongoose.Schema(
     product_color: { type: String },
     product_weight: { type: String }, 
     product_size: { type: String }, 
-    variant_img: { type: String }, 
+    // variant_img: { type: String }, 
     product_price: { type: Number, required: true },
     product_countInStock: { type: Number, required: true },
   },
@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema(
   {
     product_title: { type: String, required: true },
     product_category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-    product_img: { type: [String] }, 
+    // product_img: { type: [Buffer] }, 
     product_description: { type: String, required: true },
     product_display: { type: Boolean, required: true, default: false },
     product_famous: { type: Boolean, required: true, default: false }, 
@@ -37,6 +37,7 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: 'Product'
   }
 );
 
