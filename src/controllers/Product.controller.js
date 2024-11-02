@@ -1,82 +1,69 @@
 const ProductService = require("../services/Product.service");
-const fs = require('fs');
+const multer = require("multer");
+const slugify = require("slugify");
+const crypto = require("crypto");
+
+// Cấu hình Multer để lưu file vào bộ nhớ tạm
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const createProduct = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({ message: "Request body is undefined" });
-    }
-
     const {
       product_title,
       product_category,
-      // product_img,
       product_description,
+      product_display,
+      product_famous,
+      product_rate = 0,
       product_selled,
       product_percent_discount,
       variants
     } = req.body;
 
-    // Kiểm tra `variants` là mảng và có ít nhất một phần tử
-    if (!Array.isArray(variants) || variants.length === 0) {
-      return res.status(400).json({ message: "Variants must be a non-empty array" });
-    }
+    const slug = product_title
+      ? slugify(product_title, { lower: true, strict: true })
+      : crypto.randomBytes(6).toString("hex");
 
-    // Destructuring `variants`
-    const [
-      { pet_age, product_color, product_weight, product_size, variant_img, product_price, product_countInStock }
-    ] = variants;
+    // Chuyển đổi `product_images` từ file sang chuỗi Base64
+    const product_images = req.files['product_images']?.map((file) => {
+      return file.buffer.toString("base64");
+    }) || [];
 
-    // Xử lý `product_img` để chuyển thành Base64 nếu cần
-    // let base64Images = [];
-    // if (Array.isArray(product_img)) {
-    //   base64Images = product_img.map((img) => {
-    //     if (img && img.path) {
-    //       return fs.readFileSync(img.path, 'base64');
-    //     }
-    //     return null;
-    //   }).filter(Boolean);
-    // } else if (typeof product_img === 'string') {
-    //   base64Images = [product_img]; // Giả định là `product_img` là chuỗi Base64
-    // }
+    // Chuyển đổi `variant_img` cho từng biến thể
+    const parsedVariants = JSON.parse(variants);
+    const updatedVariants = parsedVariants.map((variant, index) => {
+      const variantFile = req.files[`variant_img_${index}`]?.[0];
+      if (variantFile) {
+        variant.variant_img = variantFile.buffer.toString("base64");
+      }
+      return variant;
+    });
 
-    // Kiểm tra các trường bắt buộc
-    if (
-      !product_title ||
-      !product_category ||
-      // product_img.length === 0 ||
-      !product_description ||
-      !product_selled ||
-      !product_percent_discount
-    ) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The input is required",
-      });
-    }
-
-    const productData = {
+    const newProductData = {
       product_title,
       product_category,
-      // product_img: base64Images,
+      product_images,
       product_description,
+      product_display,
+      product_famous,
+      product_rate,
       product_selled,
       product_percent_discount,
-      variants: [
-        { pet_age, product_color, product_weight, product_size, product_price, product_countInStock }, // thiếu variant_img
-      ],
+      variants: updatedVariants,
+      slug
     };
 
-    const response = await ProductService.createProduct(productData);
-    return res.status(201).json(response);
-  } catch (e) {
-    console.error("Error:", e); // Log lỗi ra console để dễ debug hơn
-    return res.status(500).json({
-      message: e.message || "Internal Server Error",
-    });
+    const response = await ProductService.createProduct(newProductData);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Lỗi khi tạo sản phẩm" });
   }
 };
 
-module.exports = {
-  createProduct,
-};
+const uploadFields = upload.fields([
+  { name: "product_images", maxCount: 10 }, 
+  { name: "variant_img_0", maxCount: 1 },
+]);
+
+module.exports = { createProduct, uploadFields };

@@ -1,12 +1,12 @@
 const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
 
-// Tạo sản phẩm
 const createProduct = (newProduct) => {
   return new Promise(async (resolve, reject) => {
     const {
       product_title,
       product_category,
+      product_images,
       product_description,
       product_display,
       product_famous,
@@ -14,11 +14,11 @@ const createProduct = (newProduct) => {
       product_feedback,
       product_selled,
       product_percent_discount,
-      variants // Để nguyên `variants` là một mảng
+      variants,
+      slug 
     } = newProduct;
 
     try {
-      // Kiểm tra trùng lặp tiêu đề sản phẩm
       const checkProductTitle = await Product.findOne({ product_title });
       if (checkProductTitle !== null) {
         return resolve({
@@ -27,7 +27,6 @@ const createProduct = (newProduct) => {
         });
       }
 
-      // Kiểm tra sự tồn tại của danh mục sản phẩm
       const checkProductCategory = await Category.findById(product_category);
       if (checkProductCategory == null) {
         return resolve({
@@ -36,10 +35,10 @@ const createProduct = (newProduct) => {
         });
       }
 
-      // Xây dựng dữ liệu sản phẩm mới
       const newProductData = {
         product_title,
         product_category,
+        product_images,
         product_description,
         product_display,
         product_famous,
@@ -47,16 +46,16 @@ const createProduct = (newProduct) => {
         product_feedback,
         product_selled,
         product_percent_discount,
-        variants, // Không destructure mà giữ nguyên cấu trúc của mảng `variants`
+        variants,
+        slug 
       };
 
-      // Tạo sản phẩm mới trong database
       const newProductInstance = await Product.create(newProductData);
 
       if (newProductInstance) {
         return resolve({
           status: "OK",
-          message: "SUCCESS",
+          message: "Sản phẩm đã được tạo thành công",
           data: newProductInstance,
         });
       }
