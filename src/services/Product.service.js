@@ -127,7 +127,7 @@ const deleteProduct = (id) => {
       await Product.updateOne(
         { _id: id },
         {
-          deleted: true,
+          is_delete: true,
           deletedBy: {
             // account_id: userId,
             deletedAt: new Date(),
@@ -136,7 +136,7 @@ const deleteProduct = (id) => {
       );
       resolve({
         status: "deleted",
-        message: "cập nhật trạng thái thành công",
+        message: "cập nhật trạng thái thành công"
       });
 
       // await Product.findByIdAndDelete(id);
@@ -169,19 +169,20 @@ const deleteManyProduct = (ids) => {
         await Product.updateOne(
           { _id: id },
           {
-            deleted: true,
+            is_delete: true,
             deletedBy: {
               // account_id: userId,
               deletedAt: new Date(),
             },
           }
         );
+
       }
       resolve({
         status: "OK",
         message:
           "Successfully updated deleted status for all specified products",
-        notFoundIds,
+        notFoundIds
       });
     } catch (e) {
       reject({
