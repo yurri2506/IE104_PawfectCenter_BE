@@ -5,8 +5,8 @@ const userSchema = new mongoose.Schema(
     user_name: { type: String, required: true }, 
     user_password: { type: String, required: true }, 
     user_avt_img: { type: String }, 
-    user_email: { type: String, unique: true }, 
-    user_phone: { type: String, unique: true }, 
+    user_email: { type: String}, 
+    user_phone: { type: String}, 
     user_address: { 
       home_address: {type: String},
       province: { type: String}, 
@@ -18,7 +18,8 @@ const userSchema = new mongoose.Schema(
     is_delete : {type: Boolean, default: false}
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: 'User'
   }
 );
 
