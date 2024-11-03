@@ -92,7 +92,10 @@ const updateProduct = (id, data) => {
       }
 
       // Cập nhật sản phẩm chỉ với các trường được cung cấp trong `data`
-      const updatedProduct = await Product.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+      const updatedProduct = await Product.findByIdAndUpdate(id, data, {
+        new: true,
+        runValidators: true,
+      });
       return resolve({
         status: "OK",
         message: "SUCCESS",
@@ -107,7 +110,50 @@ const updateProduct = (id, data) => {
   });
 };
 
+// Xóa sản phẩm
+const deleteProduct = (id, userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const checkProduct = await Product.findOne({
+        _id: id,
+      });
+      if (checkProduct === null) {
+        resolve({
+          status: "ERR",
+          message: "The product is not defined",
+        });
+      }
+
+      await Product.updateOne(
+        {_id : id}, 
+        {
+        deleted: true,
+        deletedBy: {
+          account_id: userId,
+          deletedAt: new Date(),
+        }}
+      )
+      resolve({
+        status: 'deleted',
+        message: "cập nhật trạng thái thành công",
+      })
+
+      // await Product.findByIdAndDelete(id);
+      // resolve({
+      //   status: "OK",
+      //   message: "Delete product success",
+      // });
+    } catch (e) {
+      reject({
+        status: "ERR",
+        message: e.message || "Error while delete the product",
+      });
+    }
+  });
+};
+
 module.exports = {
   createProduct,
   updateProduct,
+  deleteProduct,
 };
