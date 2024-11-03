@@ -125,18 +125,19 @@ const deleteProduct = (id) => {
       }
 
       await Product.updateOne(
-        {_id : id}, 
+        { _id: id },
         {
-        deleted: true,
-        deletedBy: {
-          // account_id: userId,
-          deletedAt: new Date(),
-        }}
-      )
+          deleted: true,
+          deletedBy: {
+            // account_id: userId,
+            deletedAt: new Date(),
+          },
+        }
+      );
       resolve({
-        status: 'deleted',
+        status: "deleted",
         message: "cập nhật trạng thái thành công",
-      })
+      });
 
       // await Product.findByIdAndDelete(id);
       // resolve({
@@ -156,10 +157,10 @@ const deleteManyProduct = (ids) => {
   return new Promise(async (resolve, reject) => {
     try {
       const notFoundIds = [];
-      
+
       for (const id of ids) {
         const checkProduct = await Product.findOne({ _id: id });
-        
+
         if (checkProduct === null) {
           notFoundIds.push(id);
           continue;
@@ -172,17 +173,16 @@ const deleteManyProduct = (ids) => {
             deletedBy: {
               // account_id: userId,
               deletedAt: new Date(),
-            }
+            },
           }
         );
       }
-
       resolve({
         status: "OK",
-        message: "Successfully updated deleted status for all specified products",
+        message:
+          "Successfully updated deleted status for all specified products",
         notFoundIds,
       });
-
     } catch (e) {
       reject({
         status: "ERR",
@@ -192,10 +192,34 @@ const deleteManyProduct = (ids) => {
   });
 };
 
+const getDetailsProduct = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const product = await Product.findOne({
+        _id: id,
+      });
+      if (product === null) {
+        resolve({
+          status: "ERR",
+          message: "The product is not defined",
+        });
+      }
+
+      resolve({
+        status: "OK",
+        message: "Lấy thông tin chi tiết thành công",
+        data: product,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
   deleteManyProduct,
+  getDetailsProduct,
 };
