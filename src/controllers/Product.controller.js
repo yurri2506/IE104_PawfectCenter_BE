@@ -71,21 +71,49 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-      const productId = req.params.id
-      const data = req.body
-      if (!productId) {
-          return res.status(200).json({
-              status: 'ERR',
-              message: 'The productId is required'
-          })
-      }
-      const response = await ProductService.updateProduct(productId, data)
-      return res.status(200).json(response)
+    const productId = req.params.id;
+    const data = req.body;
+    if (!productId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The productId is required",
+      });
+    }
+    const response = await ProductService.updateProduct(productId, data);
+    return res.status(200).json(response);
   } catch (e) {
-      return res.status(404).json({
-          message: e
-      })
+    return res.status(404).json({
+      message: e,
+    });
   }
-}
+};
 
-module.exports = { createProduct, uploadFields,updateProduct};
+const deleteProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    if (!productId) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "The productId is required",
+      });
+    }
+
+    // Lấy `user.id` từ `res.locals` và truyền xuống service
+    // const userId = res.locals.user.id;
+    const response = await ProductService.deleteProduct(productId);
+
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "An error occurred while deleting the product.",
+    });
+  }
+};
+
+module.exports = {
+  createProduct,
+  uploadFields,
+  updateProduct,
+  deleteProduct,
+};
