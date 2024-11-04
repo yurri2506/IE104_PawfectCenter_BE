@@ -10,5 +10,6 @@ router.post('/signUpPhone', userController.signUpPhone)
 router.post('/signUpEmail', userController.signUpEmail)
 router.post('/signIn', userController.signIn)
 router.get('/getUser/:id', authUserMiddleWare, userController.getDetailUser)
-
+router.post('/edit-user/:id', authUserMiddleWare, userController.editUser)
+router.post('/change-password/:id', authUserMiddleWare, userController.changePassword)
 module.exports = router

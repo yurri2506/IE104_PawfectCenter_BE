@@ -1,4 +1,5 @@
 const userService = require("../services/User.service")
+const { changePasswordSchema } = require("../validations/ChangePassword.validate")
 const {userSignUpPhone, userSignUpEmail} = require('../validations/UserSignUp.validation')
 
 const signUpPhone = async(req, res)=>{
@@ -124,9 +125,64 @@ const getDetailUser = async(req, res) =>{
     }
 }
 
+const editUser = async(req, res) =>{
+    try{
+        const userId = req.params.id
+
+        if(!userId){
+            return res.status(200).json({
+                status: 'ERR',
+                message: 'The userId is required'
+            })
+        }
+
+        const response = await userService.editUser(req.body, userId)
+        return res.status(200).json(response)
+    }catch(err){
+        return res.status(500).json({
+            message: err
+        })
+    }
+}
+
+const changePassword = async(req, res) => {
+    try{
+        const {error} = changePasswordSchema.validate(req.body, {abortEarly: false})
+        const userId = req.params.id
+
+        if(!userId){
+            return res.status(400).json({
+                status: 'ERR',
+                message: 'The userId is required'
+            })
+        }
+
+        if(error){
+            return res.status(400).json({
+                status: 'ERROR',
+                errors: error.details.reduce((acc, detail) =>{
+                    acc[detail.context.key] = detail.message
+                    return acc
+                }, {})
+            })
+        }
+
+        const response = await userService.changePassword(req.body, userId)
+
+        return res.status(200).json(response)
+        
+    }catch(err){
+        console.error(err)
+        return res.status(500).json({
+            message: err
+        })
+    }
+}
 module.exports = {
     signUpPhone,
     signUpEmail,
     signIn,
-    getDetailUser
+    getDetailUser,
+    editUser,
+    changePassword
 }

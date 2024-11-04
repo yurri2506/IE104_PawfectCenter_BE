@@ -1,6 +1,7 @@
 const User = require('../models/User.model')
 const bcrypt = require('bcrypt')
 const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
+const { messaging } = require('firebase-admin')
 
 const signUpPhone = (newUser)=>{
     return new Promise( async(resolve, reject)=>{
@@ -160,9 +161,86 @@ const getDetailUser = (userId)=>{
     })
   }
 
+const editUser = (userEdited, userId) =>{
+    return new Promise (async(resolve, reject) =>{
+        try{
+            const user = await User.findById(userId)
+            const {name, email, phone, sex, birth} = userEdited
+            if(!user){
+                return reject({
+                    status: "ERROR",
+                    message: "Tai khoan khong ton tai"
+                })
+            }else{
+                const EditUser = await User.findByIdAndUpdate(
+                    userId,
+                    {
+                        user_name: name,
+                        user_email: email,
+                        user_phone: phone,
+                        user_sex: sex,
+                        user_birth: birth
+                    },
+                    { new: true } // Tùy chọn trả về tài liệu sau khi cập nhật
+                );
+                return resolve({
+                    status: 'OK',
+                    message: 'Chinh sua thanh cong',
+                    data: EditUser
+                })
+            }        
+        }catch(err){
+            reject(err)
+        }
+    })
+}
+
+const changePassword = (data, userId) =>{
+    return new Promise (async(resolve, reject) => {
+        try{
+            const {password, newPassword, confirmNewPass} = data
+            const user = await User.findById(userId)
+
+            if(!user){
+                return reject({
+                    status: "ERROR",
+                    message: "Tai khoan khong ton tai"
+                })
+            }else{
+                const isPasswordCorrect = await bcrypt.compare(password, user.user_password);
+                if (!isPasswordCorrect) {
+                    return reject({
+                        status: 'ERROR',
+                        message: 'Mật khẩu không chính xác'
+                    });
+                }
+
+                const hash = bcrypt.hashSync(newPassword, 10)
+                const EditUser = await
+                User.findByIdAndUpdate(
+                    userId,
+                    {
+                        user_password: hash
+                    },
+                    { new: true } // Tùy chọn trả về tài liệu sau khi cập nhật
+                );
+                return resolve({
+                    status: 'OK',
+                    message: 'Doi mat khau thanh cong',
+                    data: EditUser
+                })
+            }        
+
+        }catch(err){
+            reject(err)
+        }
+    })
+}
 module.exports = {
     signUpPhone,
     signUpEmail,
     signIn,
-    getDetailUser
+    getDetailUser,
+    editUser,
+    changePassword
 }
