@@ -147,6 +147,26 @@ const getDetailsProduct = async (req, res) => {
   }
 };
 
+const getAllProduct = async (req, res) => {
+  try {
+    const { limit, page, sort, filter } = req.query;
+    const parsedFilter = filter ? JSON.parse(filter) : {};
+    const response = await ProductService.getAllProduct(
+      Number(limit) || null,
+      Number(page) || 0,
+      sort,
+      parsedFilter
+    );
+    
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e.message,
+    });
+  }
+};
+
+
 module.exports = {
   createProduct,
   uploadFields,
@@ -154,4 +174,5 @@ module.exports = {
   deleteProduct,
   deleteManyProduct,
   getDetailsProduct,
+  getAllProduct,
 };
