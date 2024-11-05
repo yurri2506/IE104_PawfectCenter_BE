@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
 
-// Tạo sản phẩm
+// Tạo danh mục
 const createCategory = async (newCategory) => {
   try {
     const { category_title, category_parent_id, isActive, slug } = newCategory;
@@ -48,64 +48,68 @@ const createCategory = async (newCategory) => {
   }
 };
 
-// Sửa sản phẩm
+// Sửa danh mục
 const updateCategory = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      // Kiểm tra ID có hợp lệ không
+      console.log("Bắt đầu hàm updateCategory");
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return resolve({
           status: "ERR",
-          message: "Invalid product ID",
+          message: "ID danh mục không hợp lệ",
         });
       }
 
-      // Kiểm tra sản phẩm có tồn tại không
-      const checkProduct = await Product.findOne({ _id: id });
-      if (!checkProduct) {
+      const checkCategory = await Category.findOne({ _id: id });
+      if (!checkCategory) {
         return resolve({
           status: "ERR",
-          message: "The product is not defined",
+          message: "ID danh mục chưa có trong dữ liệu",
         });
       }
 
-      // Cập nhật sản phẩm chỉ với các trường được cung cấp trong `data`
-      const updatedProduct = await Product.findByIdAndUpdate(id, data, {
+      const updatedCategory = await Category.findByIdAndUpdate(id, data, {
         new: true,
         runValidators: true,
       });
       return resolve({
         status: "OK",
         message: "SUCCESS",
-        data: updatedProduct,
+        data: updatedCategory,
       });
     } catch (e) {
       reject({
         status: "ERR",
-        message: e.message || "Error while updating the product",
+        message: e.message || "Lỗi trong quá trình cập nhật danh mục sản phẩm",
       });
     }
   });
 };
 
-// Xóa sản phẩm
+// Xóa danh mục
 const deleteCategory = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkProduct = await Product.findOne({
+      const checkCategory = await Category.findOne({
         _id: id,
       });
-      if (checkProduct === null) {
+      if (checkCategory === null) {
         resolve({
           status: "ERR",
-          message: "The product is not defined",
+          message: "The Category is not defined",
+        });
+      }
+      if (checkCategory.isDelete === true) {
+        resolve({
+          status: "ERR",
+          message: "Danh mục đã bị xóa",
         });
       }
 
-      await Product.updateOne(
+      const newData = await Category.updateOne(
         { _id: id },
         {
-          is_delete: true,
+          isDelete: true,
           deletedBy: {
             // account_id: userId,
             deletedAt: new Date(),
@@ -115,6 +119,7 @@ const deleteCategory = (id) => {
       resolve({
         status: "deleted",
         message: "cập nhật trạng thái thành công",
+        data: newData.isDelete,
       });
 
       // await Product.findByIdAndDelete(id);
@@ -125,74 +130,40 @@ const deleteCategory = (id) => {
     } catch (e) {
       reject({
         status: "ERR",
-        message: e.message || "Error while delete the product",
+        message: e.message || "Error while delete the category",
       });
     }
   });
 };
 
-const getTypeCategory = (limit, page, sort, filter = {}) => {
+const getTypeCategory = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const query = { is_delete: false };
-      console.log("Filter:", filter);
+      const allCategories = await Category.find();
 
-      if (filter.product_category) {
-        console.log("Product Category Filter:", filter.product_category);
-        query.product_category = filter.product_category;
-      } else {
-        console.log("Filter không tồn tại hoặc không có product_category");
-      }
+      const categoriesByLevel = {};
 
-      if (filter.otherField && filter.otherValue) {
-        query[filter.otherField] = { $regex: filter.otherValue, $options: "i" };
-      }
-
-      const totalProduct = await Product.countDocuments(query);
-
-      if (totalProduct === 0) {
-        return resolve({
-          status: "OK",
-          message: "No products found",
-          data: [],
-          total: 0,
-          pageCurrent: Number(page) + 1,
-          totalPage: 0,
-        });
-      }
-
-      const skip = page * limit;
-
-      let sortOptions = { createdAt: -1, updatedAt: -1 };
-      if (sort) {
-        if (sort === "price_asc") {
-          sortOptions = { "variants.product_price": 1 };
-        } else if (sort === "price_desc") {
-          sortOptions = { "variants.product_price": -1 };
-        } else if (sort === "best_selling") {
-          sortOptions = { product_selled: -1 };
-        } else if (sort === "popular") {
-          sortOptions = { product_rate: -1 };
+      allCategories.forEach((category) => {
+        const level = category.category_level;
+        if (!categoriesByLevel[level]) {
+          categoriesByLevel[level] = [];
         }
-      }
-
-      const allProduct = await Product.find(query)
-        .limit(limit)
-        .skip(skip)
-        .sort(sortOptions);
+        categoriesByLevel[level].push({
+          _id: category._id,
+          name: category.category_title,
+          level: category.category_level,
+        });
+      });
 
       resolve({
         status: "OK",
         message: "Success",
-        data: allProduct,
-        total: totalProduct,
-        pageCurrent: Number(page) + 1,
-        totalPage: Math.ceil(totalProduct / limit),
+        data: categoriesByLevel,
       });
     } catch (e) {
       reject({
-        status: "Error",
-        message: e.message,
+        status: "ERR",
+        message: e.message || "Error while fetching categories",
       });
     }
   });

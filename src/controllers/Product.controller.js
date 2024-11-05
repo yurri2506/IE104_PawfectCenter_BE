@@ -79,6 +79,12 @@ const updateProduct = async (req, res) => {
         message: "The productId is required",
       });
     }
+    if (!data) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "Thông tin cập nhật không có",
+      });
+    }
     const response = await ProductService.updateProduct(productId, data);
     return res.status(200).json(response);
   } catch (e) {

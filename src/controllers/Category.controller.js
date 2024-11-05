@@ -48,15 +48,21 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
-    const productId = req.params.id;
+    const categoryId = req.params.id;
     const data = req.body;
-    if (!productId) {
+    if (!data) {
       return res.status(200).json({
         status: "ERR",
-        message: "The productId is required",
+        message: "Thông tin cập nhật không có",
       });
     }
-    const response = await ProductService.updateProduct(productId, data);
+    if (!categoryId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "ID danh mục sản phẩm là bắt buộc",
+      });
+    }
+    const response = await CategoryService.updateCategory(categoryId, data);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -67,44 +73,34 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
-    const productId = req.params.id;
-    if (!productId) {
+    const categoryId = req.params.id;
+    if (!categoryId) {
       return res.status(400).json({
         status: "ERR",
-        message: "The productId is required",
+        message: "The categoryId is required",
       });
     }
 
-    // Lấy `user.id` từ `res.locals` và truyền xuống service
-    // const userId = res.locals.user.id;
-    const response = await ProductService.deleteProduct(productId);
+    const response = await CategoryService.deleteCategory(categoryId);
 
     return res.status(200).json(response);
   } catch (e) {
     return res.status(500).json({
       status: "ERR",
-      message: e.message || "An error occurred while deleting the product.",
+      message: e.message || "An error occurred while deleting the category.",
     });
   }
 };
 
 const getTypeCategory = async (req, res) => {
   try {
-    const { limit, page, sort, filter } = req.query;
-    const parsedFilter = filter ? JSON.parse(filter) : {};
-    const response = await ProductService.getAllProduct(
-      Number(limit) || null,
-      Number(page) || 0,
-      sort,
-      parsedFilter
-    );
-    
+    const response = await CategoryService.getTypeCategory();
     return res.status(200).json(response);
   } catch (e) {
-    return res.status(404).json({
-      message: e.message,
-    });
-  }
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "Error while fetching categories",
+    });}
 };
 
 module.exports = {
