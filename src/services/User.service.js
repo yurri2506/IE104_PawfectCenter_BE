@@ -103,6 +103,7 @@ const signIn = (signInUser) => {
             if (!checkUser) {
                 return reject({
                     status: 'ERROR',
+                    field: 'email_or_phone',
                     message: 'Tài khoản chưa được đăng ký'
                 });
             }
@@ -111,6 +112,7 @@ const signIn = (signInUser) => {
             if (!isPasswordCorrect) {
                 return reject({
                     status: 'ERROR',
+                    field: 'isTruePass',
                     message: 'Mật khẩu không chính xác'
                 });
             }
