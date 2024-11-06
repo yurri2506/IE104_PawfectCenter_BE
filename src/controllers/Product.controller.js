@@ -79,6 +79,12 @@ const updateProduct = async (req, res) => {
         message: "The productId is required",
       });
     }
+    if (!data) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "Thông tin cập nhật không có",
+      });
+    }
     const response = await ProductService.updateProduct(productId, data);
     return res.status(200).json(response);
   } catch (e) {
@@ -111,9 +117,68 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const deleteManyProduct = async (req, res) => {
+  try {
+    const ids = req.body.ids;
+    if (!ids) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The ids is required",
+      });
+    }
+    const response = await ProductService.deleteManyProduct(ids);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+
+const getDetailsProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    if (!productId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The productId is required",
+      });
+    }
+    const response = await ProductService.getDetailsProduct(productId);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+
+const getAllProduct = async (req, res) => {
+  try {
+    const { limit, page, sort, filter } = req.query;
+    const parsedFilter = filter ? JSON.parse(filter) : {};
+    const response = await ProductService.getAllProduct(
+      Number(limit) || null,
+      Number(page) || 0,
+      sort,
+      parsedFilter
+    );
+    
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e.message,
+    });
+  }
+};
+
+
 module.exports = {
   createProduct,
   uploadFields,
   updateProduct,
   deleteProduct,
+  deleteManyProduct,
+  getDetailsProduct,
+  getAllProduct,
 };

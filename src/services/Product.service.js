@@ -111,7 +111,7 @@ const updateProduct = (id, data) => {
 };
 
 // Xóa sản phẩm
-const deleteProduct = (id, userId) => {
+const deleteProduct = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const checkProduct = await Product.findOne({
@@ -125,18 +125,19 @@ const deleteProduct = (id, userId) => {
       }
 
       await Product.updateOne(
-        {_id : id}, 
+        { _id: id },
         {
-        deleted: true,
-        deletedBy: {
-          account_id: userId,
-          deletedAt: new Date(),
-        }}
-      )
+          is_delete: true,
+          deletedBy: {
+            // account_id: userId,
+            deletedAt: new Date(),
+          },
+        }
+      );
       resolve({
-        status: 'deleted',
+        status: "deleted",
         message: "cập nhật trạng thái thành công",
-      })
+      });
 
       // await Product.findByIdAndDelete(id);
       // resolve({
@@ -152,8 +153,144 @@ const deleteProduct = (id, userId) => {
   });
 };
 
+const deleteManyProduct = (ids) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const notFoundIds = [];
+
+      for (const id of ids) {
+        const checkProduct = await Product.findOne({ _id: id });
+
+        if (checkProduct === null) {
+          notFoundIds.push(id);
+          continue;
+        }
+
+        await Product.updateOne(
+          { _id: id },
+          {
+            is_delete: true,
+            deletedBy: {
+              // account_id: userId,
+              deletedAt: new Date(),
+            },
+          }
+        );
+      }
+      resolve({
+        status: "OK",
+        message:
+          "Successfully updated deleted status for all specified products",
+        notFoundIds,
+      });
+    } catch (e) {
+      reject({
+        status: "ERR",
+        message: e.message || "Error while deleting the products",
+      });
+    }
+  });
+};
+
+const getDetailsProduct = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const product = await Product.findOne({
+        _id: id,
+      });
+      if (product === null) {
+        resolve({
+          status: "ERR",
+          message: "The product is not defined",
+        });
+      }
+
+      resolve({
+        status: "OK",
+        message: "Lấy thông tin chi tiết thành công",
+        data: product,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+const getAllProduct = (limit, page, sort, filter = {}) => { 
+  return new Promise(async (resolve, reject) => {
+    try {
+      const query = { is_delete: false };
+      console.log("Filter:", filter); 
+
+      if (filter.product_category) {
+        console.log("Product Category Filter:", filter.product_category);
+        query.product_category = filter.product_category;
+      } else {
+        console.log("Filter không tồn tại hoặc không có product_category");
+      }
+
+      if (filter.otherField && filter.otherValue) {
+        query[filter.otherField] = { $regex: filter.otherValue, $options: "i" };
+      }
+
+      const totalProduct = await Product.countDocuments(query);
+
+      if (totalProduct === 0) {
+        return resolve({
+          status: "OK",
+          message: "No products found",
+          data: [],
+          total: 0,
+          pageCurrent: Number(page) + 1,
+          totalPage: 0,
+        });
+      }
+
+      const skip = page * limit;
+
+      let sortOptions = { createdAt: -1, updatedAt: -1 };
+      if (sort) {
+        if (sort === "price_asc") {
+          sortOptions = { "variants.product_price": 1 };
+        } else if (sort === "price_desc") {
+          sortOptions = { "variants.product_price": -1 };
+        } else if (sort === "best_selling") {
+          sortOptions = { product_selled: -1 };
+        } else if (sort === "popular") {
+          sortOptions = { product_rate: -1 };
+        }
+      }
+
+      const allProduct = await Product.find(query)
+        .limit(limit)
+        .skip(skip)
+        .sort(sortOptions);
+
+      resolve({
+        status: "OK",
+        message: "Success",
+        data: allProduct,
+        total: totalProduct,
+        pageCurrent: Number(page) + 1,
+        totalPage: Math.ceil(totalProduct / limit),
+      });
+    } catch (e) {
+      reject({
+        status: "Error",
+        message: e.message,
+      });
+    }
+  });
+};
+
+
+
+
 module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  deleteManyProduct,
+  getDetailsProduct,
+  getAllProduct,
 };
