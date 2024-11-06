@@ -100,7 +100,7 @@ const signIn = (signInUser) => {
             }
             console.log(checkUser)
 
-            if (!checkUser) {
+            if (!checkUser || checkUser.is_delete) {
                 return reject({
                     status: 'ERROR',
                     field: 'email_or_phone',
@@ -142,9 +142,8 @@ const signIn = (signInUser) => {
 
 const getDetailUser = (userId)=>{
     return new Promise( async(resolve, reject)=>{
+        const user = await User.findById(userId)
         try{
-            const user = await User.findById(userId)
-
             if(user === null){
                 return reject({
                     status: 'ERROR',
@@ -165,16 +164,16 @@ const getDetailUser = (userId)=>{
 
 const editUser = (userEdited, userId) =>{
     return new Promise (async(resolve, reject) =>{
+        const {name, email, phone, sex, birth} = userEdited
         try{
             const user = await User.findById(userId)
-            const {name, email, phone, sex, birth} = userEdited
             if(!user){
                 return reject({
                     status: "ERROR",
                     message: "Tai khoan khong ton tai"
                 })
             }else{
-                const EditUser = await User.findByIdAndUpdate(
+                const editUser = await User.findByIdAndUpdate(
                     userId,
                     {
                         user_name: name,
@@ -188,7 +187,7 @@ const editUser = (userEdited, userId) =>{
                 return resolve({
                     status: 'OK',
                     message: 'Chinh sua thanh cong',
-                    data: EditUser
+                    data: editUser
                 })
             }        
         }catch(err){
@@ -199,8 +198,8 @@ const editUser = (userEdited, userId) =>{
 
 const changePassword = (data, userId) =>{
     return new Promise (async(resolve, reject) => {
+        const {password, newPassword, confirmNewPass} = data
         try{
-            const {password, newPassword, confirmNewPass} = data
             const user = await User.findById(userId)
 
             if(!user){
@@ -218,7 +217,7 @@ const changePassword = (data, userId) =>{
                 }
 
                 const hash = bcrypt.hashSync(newPassword, 10)
-                const EditUser = await
+                const editUser = await
                 User.findByIdAndUpdate(
                     userId,
                     {
@@ -229,12 +228,160 @@ const changePassword = (data, userId) =>{
                 return resolve({
                     status: 'OK',
                     message: 'Doi mat khau thanh cong',
-                    data: EditUser
+                    data: editUser
                 })
             }        
 
         }catch(err){
             reject(err)
+        }
+    })
+}
+
+const forgetPassword = (data) =>{
+    return new Promise(async(resolve, reject) =>{
+        const{email, phone, newPassword, confirmNewPass} = data
+        try {
+            let user
+            if(email && !phone){
+                user = await User.findOne({
+                    user_email: email
+                })
+            }
+            if(!email && phone){
+                user = await User.findOne({
+                    user_phone: phone
+                })
+            }
+
+            if(!user){
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tai khoan nay chua duoc dang ky'
+                })
+            }
+
+            const hash = bcrypt.hashSync(newPassword, 10)
+            const editUser = await User.findByIdAndUpdate(
+                user._id,
+                {
+                    user_password: hash
+                },
+                {new: true}
+            )
+
+            return resolve({
+                status: 'Successfully',
+                message: 'Dat lai mat khau thanh cong',
+                data: editUser
+            })
+        } catch (err) {
+            return reject({
+                status: 'ERROR',
+                message: err.message
+            })
+        }
+    })
+}
+
+const deleteUser = (userId) =>{
+    return new Promise( async(resolve, reject) =>{
+        try {
+            const user = await User.findById(userId)
+            if(!user){
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tai khoan nay khong ton tai'
+                })
+            }
+
+            const userDelete = await User.findByIdAndUpdate(
+                userId,
+                {
+                    is_delete: true
+                },
+                {new: true}
+            )
+
+            return resolve({
+                status: 'Successfully',
+                message: 'Xoa tai khoan nguoi dung thanh cong',
+                data: userDelete
+            })
+        } catch (err) {
+            
+        }
+    })
+}
+
+const addAddress = (userId, newAddress) =>{
+    return new Promise (async( resolve, reject) =>{
+        try {
+            const user = await User.findById(userId)
+            if(!user){
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tai khoan nay khong ton tai'
+                })
+            }
+
+            if (newAddress.isDefault) {
+                await User.updateOne(
+                    { _id: userId, "user_address.isDefault": true },
+                    { $set: { "user_address.$.isDefault": false } }
+                );
+            }
+            const userAddAdress = await User.findByIdAndUpdate(
+                userId,
+                {
+                    $push: { user_address: newAddress } 
+                },
+                {new: true}
+            )
+
+            return resolve({
+                status: 'Successfully',
+                message: 'Them dia chi moi thanh cong',
+                data: userAddAdress
+            })
+
+        } catch (err) {
+            return reject(err)
+        }
+    })
+}
+
+const setAddressDefault = (userId, addressId)=>{
+    return new Promise (async(resolve, reject) => {
+        try {
+            const user = await User.findOne({
+                _id: userId,
+                "user_address._id" : addressId
+            })
+            if(!user){
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tai khoan nay khong ton tai hoac dia chi khong ton tai'
+                })
+            }
+
+            await User.updateOne(
+                {_id: userId, "user_address.isDefault": true},
+                { $set: { "user_address.$.isDefault": false } }
+            )
+
+            const updateAddressUser = await User.updateOne(
+                { _id: userId, "user_address._id": addressId },
+                { $set: { "user_address.$.isDefault": true } }
+            )
+
+            return resolve({
+                status: "successfully",
+                message: 'Dat dia chi mac dinh thanh cong',
+                data: updateAddressUser
+            })
+        } catch (err) {
+            return reject(err)
         }
     })
 }
@@ -244,5 +391,9 @@ module.exports = {
     signIn,
     getDetailUser,
     editUser,
-    changePassword
+    changePassword,
+    forgetPassword,
+    deleteUser,
+    addAddress,
+    setAddressDefault
 }

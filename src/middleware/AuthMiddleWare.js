@@ -17,7 +17,7 @@ const authUserMiddleWare = (req, res, next)=>{
     }
 
     const userId = req.params.id
-    console.log(process.env.ACCESS_TOKEN)
+    console.log(process.env.ACCESS_TOKEN) 
     jwt.verify(token, process.env.ACCESS_TOKEN , function (err, user){
         if (err) {
             return res.status(404).json({
