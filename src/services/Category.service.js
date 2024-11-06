@@ -6,16 +6,10 @@ const Category = require("../models/Category.model");
 const createCategory = async (newCategory) => {
   try {
     const { category_title, category_parent_id, isActive, slug } = newCategory;
-    const checkCategoryTitle = await Category.findOne({ category_title });
-    if (checkCategoryTitle) {
-      return {
-        status: "ERR",
-        message: "Danh mục đã tồn tại",
-      };
-    }
-
     let category_level = 1;
-    if (category_parent_id) {
+    let finalSlug = slug;
+
+    if (category_parent_id && category_parent_id !== "0") {
       const parentCategory = await Category.findById(category_parent_id);
       if (!parentCategory) {
         return {
@@ -24,13 +18,15 @@ const createCategory = async (newCategory) => {
         };
       }
       category_level = parentCategory.category_level + 1;
+      // Nối slug của cha với slug hiện tại
+      finalSlug = `${parentCategory.slug}-${slug}`;
     }
     const newCategoryData = {
       category_title,
       category_parent_id,
       category_level,
       isActive,
-      slug,
+      slug: finalSlug,
     };
 
     const newCategoryInstance = await Category.create(newCategoryData);
@@ -141,14 +137,21 @@ const getTypeCategory = () => {
     try {
       const allCategories = await Category.find();
 
-      const categoriesByLevel = {};
+      const categoriesByParentAndLevel = {};
 
       allCategories.forEach((category) => {
+        const parentId = category.category_parent_id || "root";
         const level = category.category_level;
-        if (!categoriesByLevel[level]) {
-          categoriesByLevel[level] = [];
+
+        if (!categoriesByParentAndLevel[parentId]) {
+          categoriesByParentAndLevel[parentId] = {};
         }
-        categoriesByLevel[level].push({
+
+        if (!categoriesByParentAndLevel[parentId][level]) {
+          categoriesByParentAndLevel[parentId][level] = [];
+        }
+
+        categoriesByParentAndLevel[parentId][level].push({
           _id: category._id,
           name: category.category_title,
           level: category.category_level,
@@ -158,7 +161,7 @@ const getTypeCategory = () => {
       resolve({
         status: "OK",
         message: "Success",
-        data: categoriesByLevel,
+        data: categoriesByParentAndLevel,
       });
     } catch (e) {
       reject({
