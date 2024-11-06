@@ -10,5 +10,11 @@ router.post('/signUpPhone', userController.signUpPhone)
 router.post('/signUpEmail', userController.signUpEmail)
 router.post('/signIn', userController.signIn)
 router.get('/getUser/:id', authUserMiddleWare, userController.getDetailUser)
-
+router.put('/edit-user/:id', authUserMiddleWare, userController.editUser)
+router.put('/change-password/:id', authUserMiddleWare, userController.changePassword)
+router.post('/forget-password', userController.forgetPassword)
+router.post('/delete-user/:id', authUserMiddleWare, userController.deleteUser)
+router.post('/add-address/:id', authUserMiddleWare, userController.addAddress)
+router.post('/:id/set-address-default/:address_id', authUserMiddleWare, userController.setAddressDefault)
+router.post('/sign-out' ,  userController.signOut)  
 module.exports = router
