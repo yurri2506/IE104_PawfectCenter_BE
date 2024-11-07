@@ -20,8 +20,7 @@ const orderSchema = new mongoose.Schema(
         province: { type: String, required: true }, 
         district: { type: String, required: true }, 
         commune: { type: String, required: true } 
-      },
-      required: true 
+      }
     },
     products: [
       {

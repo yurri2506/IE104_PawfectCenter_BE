@@ -2,7 +2,7 @@ const CategoryService = require("../services/Order.service");
 const slugify = require("slugify");
 const crypto = require("crypto");
 
-const createCOrder = async (req, res) => {
+const createOrder = async (req, res) => {
   try {
     const {
       category_title,
@@ -104,7 +104,7 @@ const createCOrder = async (req, res) => {
 // };
 
 module.exports = {
-  createCOrder,
+  createOrder,
   // updateCategory,
   // deleteCategory,
   // getTypeCategory,
