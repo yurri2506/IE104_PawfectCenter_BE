@@ -8,6 +8,7 @@ const createDiscount = async (newDiscount) => {
     const {
       discount_title,
       discount_type,
+      discount_code,
       discount_description,
       discount_start_day,
       discount_end_day,

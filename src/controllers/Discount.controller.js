@@ -5,6 +5,7 @@ const createDiscount = async (req, res) => {
     const {
       discount_title,
       discount_type,
+      discount_code,
       discount_description,
       discount_start_day,
       discount_end_day,
@@ -13,65 +14,17 @@ const createDiscount = async (req, res) => {
       discount_condition,
     } = req.body;
 
-    if (!discount_title) {
+    if (!discount_title || discount_type ||!discount_code ||!discount_description ||!discount_start_day ||!discount_end_day ||!discount_amount ||!discount_number ||!discount_condition) {
       return res.status(200).json({
         status: "ERR",
-        message: "Tên mã giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_type) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Loại giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_description) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Thông tin chi tiết về mã giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_start_day) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Ngày bắt đầu mã giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_end_day) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Ngày kết thúc mã giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_amount) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Số lượng mã giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_number) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Phần trăm giảm giá là bắt buộc",
-      });
-    }
-
-    if (!discount_condition) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Điều kiện giảm giá là bắt buộc",
+        message: "Thiếu trường thông tin để tạo mã giảm giá",
       });
     }
 
     const newDiscountData = {
       discount_title,
       discount_type,
+      discount_code,
       discount_description,
       discount_start_day,
       discount_end_day,
