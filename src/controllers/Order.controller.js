@@ -1,48 +1,51 @@
-const CategoryService = require("../services/Order.service");
+const OrderService = require("../services/Order.service");
 const slugify = require("slugify");
 const crypto = require("crypto");
 
 const createOrder = async (req, res) => {
   try {
     const {
-      category_title,
-      category_parent_id,
-      category_level,
-      isActive,
+      discount_ids,
+      user_id,
+      shipping_fee,
+      shipping_address,
+      products,
+      order_status,
+      order_payment,
+      order_delivery_date,
+      estimated_delivery_date,
+      order_total_before,
+      order_total_after,
+      order_note,
     } = req.body;
 
-    if (!category_title) {
-      return res.status(200).json({
+    if (!user_id || !shipping_address || !products || products.length === 0 ) {
+      return res.status(400).json({
         status: "ERR",
-        message: "Tên danh mục sản phẩm là bắt buộc",
+        message: "Thiếu thông tin cần thiết để tạo đơn hàng",
       });
     }
 
-    if (!category_parent_id) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Mã danh mục cha của sản phẩm là bắt buộc",
-      });
-    }
-
-    const slug = category_title
-      ? slugify(category_title, { lower: true, strict: true })
-      : crypto.randomBytes(6).toString("hex");
-
-    const newCategoryData = {
-      category_title,
-      category_parent_id,
-      category_level,
-      isActive,
-      slug,
+    const orderData = {
+      discount_ids,
+      user_id,
+      shipping_fee,
+      shipping_address,
+      products,
+      order_status,
+      order_payment,
+      order_delivery_date,
+      estimated_delivery_date,
+      order_total_before,
+      order_total_after,
+      order_note,
     };
-
-    const response = await CategoryService.createCategory(newCategoryData);
+    const response = await OrderService.createOrder(orderData);
     return res.status(200).json(response);
   } catch (error) {
     return res
       .status(500)
-      .json({ message: error.message || "Lỗi khi tạo sản phẩm" });
+      .json({ message: error.message || "Lỗi khi tạo đơn hàng" });
   }
 };
 
