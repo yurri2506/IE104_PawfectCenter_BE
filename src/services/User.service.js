@@ -1,4 +1,5 @@
 const User = require('../models/User.model')
+const Cart = require('../models/Cart.model')
 const bcrypt = require('bcrypt')
 const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
 const { messaging } = require('firebase-admin')
@@ -23,8 +24,12 @@ const signUpPhone = (newUser)=>{
                     user_name: name,
                     user_password: hash
                 })
+            
                 console.log(createUser)
                 if(createUser){
+                    await Cart.create({
+                        user_id: createUser._id
+                    })
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
@@ -65,6 +70,9 @@ const signUpEmail = (newUser)=>{
                 })
                 console.log(createUser)
                 if(createUser){
+                    await Cart.create({
+                        user_id: createUser._id
+                    })
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
