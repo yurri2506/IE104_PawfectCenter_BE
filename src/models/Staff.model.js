@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 const staffSchema = new mongoose.Schema(
   {
-    staff_name: { type: String, required: true },
-    staff_email:  {type: String, required: true },
+    staff_name: { type: String, required: true, unique: true},
+    staff_email:  {type: String, required: true, unique: true},
     staff_password: { type: String, required: true },
     staff_phone: { type: String, required: true },
     staff_role: { 
@@ -15,7 +15,7 @@ const staffSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: Staff   
+    collection: 'Staff'
   }
 );
 
