@@ -1,3 +1,6 @@
+const { response } = require('express')
+const Admin = require('../models/Admin.model')
+const Staff = require('../models/Staff.model')
 const adminService = require('../services/Admin.service')
 
 
@@ -75,8 +78,52 @@ const createStaff = async(req, res) => {
     }
 }
 
+
+const forgetPassword = async(req, res)=>{
+    const {email, newPassword, confirmNewPass} = req.body
+    try {
+        if(!email || !newPassword, !confirmNewPass){
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Cac thong tin la bat buoc'
+            })
+        } 
+
+        const response = await adminService.forgetPassword(req.body)
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
+const changePassword = async(req, res)=>{
+    const {password, newPassword, confirmNewPass} = req.body
+    const id =  req.params.id
+    try {
+        if(!password || !newPassword, !confirmNewPass){
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Cac thong tin la bat buoc'
+            })
+        } 
+
+        const response = await adminService.changePassword(req.body, id)
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     signIn,
     createAdmin,
-    createStaff
+    createStaff,
+    forgetPassword,
+    changePassword
 }

@@ -30,11 +30,11 @@ const signIn = (signInData) =>{
 
                     access_token = await genneralAccessToken({
                     id: admin._id,
-                    role: admin.role
+                    isAdmin: admin.isAdmin
                 })
                     refresh_token = await genneralRefreshToken({
                     id: admin._id,
-                    role: admin.role
+                    isAdmin: admin.isAdmin
                 })
             }
 
@@ -61,7 +61,8 @@ const signIn = (signInData) =>{
                 status: 'OK',
                 message: 'Đăng nhập thành công',
                 ACCESS_TOKEN: access_token,
-                REFRESH_TOKEN: refresh_token
+                REFRESH_TOKEN: refresh_token,
+                data: admin
             });
         } catch (error) {
             return reject(error)
@@ -139,8 +140,104 @@ const createStaff = (newStaff) =>{
     })
 }
 
+
+const forgetPassword = (data) => {
+    return new Promise(async (resolve, reject) => {
+        const { email, newPassword, confirmNewPass } = data;
+        try {
+            const admin = await Admin.findOne({ admin_email: email });
+            const staff = await Staff.findOne({ staff_email: email });
+
+            if (!admin && !staff) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tài khoản không tồn tại'
+                });
+            }
+
+            if (newPassword !== confirmNewPass) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Mật khẩu xác nhận không khớp'
+                });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            let update
+            if (admin) {
+                update = await Admin.updateOne({ admin_email: email }, { admin_password: hashedPassword }, {new: true});
+            }
+
+            if (staff) {
+                update = await Staff.updateOne({ staff_email: email }, { staff_password: hashedPassword }, {new: true});
+            }
+
+            return resolve({
+                status: 'OK',
+                message: 'Mật khẩu đã được cập nhật thành công',
+                update: update
+            });
+        } catch (error) {
+            console.log(error)
+            return reject(error);
+        }
+    });
+};
+
+const changePassword = (data, id) => {
+    return new Promise(async (resolve, reject) => {
+        const{password, newPassword, confirmNewPass} = data
+        try {
+            const admin = await Admin.findById(id)
+
+            if (!admin) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tài khoản không tồn tại'
+                });
+            }
+            const checkPassword = await bcrypt.compare(password, admin.admin_password)
+            if(!checkPassword){
+                return reject({
+                    status: 'ERROR',
+                    message: 'Mật khẩu không chính xác'
+                });
+            }
+
+            if (newPassword !== confirmNewPass) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Mật khẩu xác nhận không khớp'
+                });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            const updateAdmin = await Admin.findByIdAndUpdate(
+                id, 
+                { 
+                    admin_password: hashedPassword 
+                },
+                {
+                    new: true
+                }
+            );
+
+            return resolve({
+                status: 'OK',
+                message: 'Mật khẩu đã được cập nhật thành công',
+                updateAdmin: updateAdmin
+            });
+        } catch (error) {
+            return reject(error);
+        }
+    });
+};
+
 module.exports = {
     signIn,
     createAdmin,
-    createStaff
+    createStaff,
+    forgetPassword,
+    changePassword
 }

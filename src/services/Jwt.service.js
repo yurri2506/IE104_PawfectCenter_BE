@@ -4,16 +4,16 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const genneralAccessToken = async(payload) =>{
-    const accessToken = jwt.sign({
+    const accessToken = jwt.sign(
         payload
-    }, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
+    , process.env.ACCESS_TOKEN, {expiresIn: '1h'})
     return accessToken
 }
 
 const genneralRefreshToken = async(payload) =>{
-    const refreshToken = jwt.sign({
+    const refreshToken = jwt.sign(
         payload
-    }, process.env.REFRESH_TOKEN, {expiresIn: '365d'})
+    , process.env.REFRESH_TOKEN, {expiresIn: '365d'})
     return refreshToken
 }
 
@@ -24,7 +24,7 @@ const refreshTokenServicce = async(refresh_token) =>{
             console.log(refresh_token)
             jwt.verify(refresh_token, process.env.REFRESH_TOKEN, async(err, user)=>{
                 if(err){
-                    resolve({
+                    reject({
                         status: 'ERROR',
                         message: 'The authentication'
                     })

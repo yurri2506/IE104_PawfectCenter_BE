@@ -3,6 +3,39 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
+const adminMiddleWare = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
+
+    if (!token) {
+        return res.status(401).json({
+            message: 'Authentication token missing',
+            status: 'ERROR'
+        });
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
+        if (err) {
+            console.log(err);
+            return res.status(403).json({
+                message: 'Authentication failed',
+                status: 'ERROR'
+            });
+        }
+        
+        console.log(user)
+        if (user?.isAdmin === true) {
+            next();
+        } else {
+            return res.status(403).json({
+                message: 'Access denied: Admins only',
+                status: 'ERROR'
+            });
+        }
+    });
+}
+
+
 const authUserMiddleWare = (req, res, next)=>{
     const authHeader = req.headers['authorization'];
     const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
@@ -26,7 +59,40 @@ const authUserMiddleWare = (req, res, next)=>{
             })
         }
         console.log(user)
-        if (user.payload?.id === userId) {
+        if (user.payload?.id === userId || user?.isAdmin ) {
+            next()
+        } else {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+    })
+}
+
+const salesAgentMiddleWare = (req, res, next)=>{
+    const authHeader = req.headers['authorization'];
+    const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
+    //const token = req.headers.token.split(' ')[1]
+    console.log(token)
+    
+    if (!token) {
+        return res.status(401).json({
+            message: 'Token is required',
+            status: 'ERROR'
+        });
+    }
+
+    console.log(process.env.ACCESS_TOKEN) 
+    jwt.verify(token, process.env.ACCESS_TOKEN , function (err, decode){
+        if (err) {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+        console.log(decode)
+        if (decode?.staff_role === 'Quản lý sản phẩm' || decode?.isAdmin) {
             next()
         } else {
             return res.status(404).json({
@@ -38,5 +104,7 @@ const authUserMiddleWare = (req, res, next)=>{
 }
 
 module.exports={
-    authUserMiddleWare
+    adminMiddleWare,
+    authUserMiddleWare,
+    salesAgentMiddleWare
 }
