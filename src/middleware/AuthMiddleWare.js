@@ -24,7 +24,7 @@ const adminMiddleWare = (req, res, next) => {
         }
         
         console.log(user)
-        if (user?.isAdmin === true) {
+        if (user?.isAdmin) {
             next();
         } else {
             return res.status(403).json({
@@ -38,8 +38,7 @@ const adminMiddleWare = (req, res, next) => {
 
 const authUserMiddleWare = (req, res, next)=>{
     const authHeader = req.headers['authorization'];
-    const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
-    //const token = req.headers.token.split(' ')[1]
+    const token = authHeader ? authHeader.split(' ')[1] : null; 
     console.log(token)
     
     if (!token) {
@@ -59,7 +58,7 @@ const authUserMiddleWare = (req, res, next)=>{
             })
         }
         console.log(user)
-        if (user.payload?.id === userId || user?.isAdmin ) {
+        if (user?.id === userId || user?.isAdmin ) {
             next()
         } else {
             return res.status(404).json({

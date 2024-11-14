@@ -1,6 +1,4 @@
-const { response } = require('express')
-const Admin = require('../models/Admin.model')
-const Staff = require('../models/Staff.model')
+
 const adminService = require('../services/Admin.service')
 
 
@@ -120,10 +118,25 @@ const changePassword = async(req, res)=>{
     }
 }
 
+const updateAdmin = async(req, res)=>{
+    const id =  req.params.id
+    try {
+        
+        const response = await adminService.updateAdmin(req.body, id)
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     signIn,
     createAdmin,
     createStaff,
     forgetPassword,
-    changePassword
+    changePassword,
+    updateAdmin
 }

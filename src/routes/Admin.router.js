@@ -11,5 +11,5 @@ router.post('/create-staff', adminMiddleWare, adminController.createStaff)
 router.post('/create-admin', adminMiddleWare, adminController.createAdmin)
 router.post('/forget-password', adminController.forgetPassword)
 router.put('/change-password/:id', authUserMiddleWare, adminController.changePassword)
-
+router.put('/update-admin/:id', authUserMiddleWare, adminController.updateAdmin)
 module.exports = router

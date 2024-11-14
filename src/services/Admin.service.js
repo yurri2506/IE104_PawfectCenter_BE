@@ -213,7 +213,7 @@ const changePassword = (data, id) => {
 
             const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-            const updateAdmin = await Admin.findByIdAndUpdate(
+            const updateAd = await Admin.findByIdAndUpdate(
                 id, 
                 { 
                     admin_password: hashedPassword 
@@ -226,7 +226,42 @@ const changePassword = (data, id) => {
             return resolve({
                 status: 'OK',
                 message: 'Mật khẩu đã được cập nhật thành công',
-                updateAdmin: updateAdmin
+                updateAdmin: updateAd
+            });
+        } catch (error) {
+            return reject(error);
+        }
+    });
+};
+
+const updateAdmin = (data, id) => {
+    return new Promise(async (resolve, reject) => {
+        const{name, email} = data
+        try {
+            const staff = await Admin.findById(id)
+
+            if (!staff) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tài khoản không tồn tại'
+                });
+            }
+            
+            const updateAd = await Admin.findByIdAndUpdate(
+                id, 
+                { 
+                    admin_name: name,
+                    admin_email: email
+                },
+                {
+                    new: true
+                }
+            );
+
+            return resolve({
+                status: 'OK',
+                message: 'Thong tin duoc cap nhat thanh cong',
+                updateAdmin: updateAd
             });
         } catch (error) {
             return reject(error);
@@ -239,5 +274,6 @@ module.exports = {
     createAdmin,
     createStaff,
     forgetPassword,
-    changePassword
+    changePassword,
+    updateAdmin
 }
