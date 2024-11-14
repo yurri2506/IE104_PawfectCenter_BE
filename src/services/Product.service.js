@@ -3,7 +3,7 @@ const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
 
 // Tạo sản phẩm
-const createOrder = (orderData) => {
+const createProduct = (orderData) => {
   return new Promise(async (resolve, reject) => {
     const {
       discount_ids,

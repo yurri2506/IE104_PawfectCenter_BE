@@ -3,8 +3,7 @@ const Product = require("../models/Product.model");
 const Order = require("../models/Order.model");
 const Discount = require('../models/Discount.model');
 
-// Tạo đơn hàng -- chưa test, phải chỉnh product, user, discount rồi mới test được
-// Sau khi test oke, nhớ tạo thêm preview order để xem trước khi lưu vào database
+// Tạo đơn hàng -- chưa test
 const createOrder = (orderData) => {
   return new Promise(async (resolve, reject) => {
     const {
@@ -151,7 +150,85 @@ const createOrder = (orderData) => {
   });
 };
 
+const updateOrder = (orderId, updateData) => {
+  // Cập nhật thông tin đơn hàng
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, { new: true });
+      if (updatedOrder) {
+        return resolve({
+          status: "OK",
+          message: "Cập nhật đơn hàng thành công",
+          data: updatedOrder,
+        });
+      } else {
+        return resolve({
+          status: "ERR",
+          message: "Không tìm thấy đơn hàng để cập nhật",
+        });
+      }
+    } catch (e) {
+      reject({
+        status: "ERR",
+        message: e.message || "Đã xảy ra lỗi khi cập nhật đơn hàng",
+      });
+    }
+  });
+};
+
+const getOrderDetails = (orderId) => {
+  // Lấy thông tin chi tiết của một đơn hàng
+  return new Promise(async (resolve, reject) => {
+    try {
+      const order = await Order.findById(orderId).populate('user_id products.product_id');
+      if (order) {
+        return resolve({
+          status: "OK",
+          message: "Lấy thông tin chi tiết đơn hàng thành công",
+          data: order,
+        });
+      } else {
+        return resolve({
+          status: "ERR",
+          message: "Không tìm thấy đơn hàng",
+        });
+      }
+    } catch (e) {
+      reject({
+        status: "ERR",
+        message: e.message || "Đã xảy ra lỗi khi lấy thông tin chi tiết đơn hàng",
+      });
+    }
+  });
+};
+
+const getUserOrders = (userId, status) => {
+  // Lấy danh sách đơn hàng của người dùng (có thể lọc theo trạng thái)
+  return new Promise(async (resolve, reject) => {
+    try {
+      let filter = { user_id: userId };
+      if (status) {
+        filter.order_status = status; // Nếu có trạng thái, lọc theo trạng thái
+      }
+
+      const orders = await Order.find(filter).populate('products.product_id');
+      return resolve({
+        status: "OK",
+        message: "Lấy danh sách đơn hàng thành công",
+        data: orders,
+      });
+    } catch (e) {
+      reject({
+        status: "ERR",
+        message: e.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng",
+      });
+    }
+  });
+};
 
 module.exports = {
   createOrder,
+  updateOrder,
+  getOrderDetails,
+  getUserOrders,
 };
