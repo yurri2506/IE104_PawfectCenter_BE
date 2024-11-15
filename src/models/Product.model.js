@@ -6,11 +6,11 @@ const variantSchema = new mongoose.Schema(
     product_color: { type: String },
     product_weight: { type: String },
     product_size: { type: String },
+    product_order_type: { type: String }, // mới thêm, oke không???
     variant_img: { type: String },
-    product_price: { type: Number, required: true },
-    product_countInStock: { type: Number, required: true },
-  },
-  { _id: false }
+    product_price: { type: Number, required: true, default: 0 },
+    product_countInStock: { type: Number, required: true, default: 0},
+  }
 );
 
 const productSchema = new mongoose.Schema(
@@ -18,6 +18,7 @@ const productSchema = new mongoose.Schema(
     product_title: { type: String, required: true },
     product_category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
     product_images: { type: [String] },
+    product_brand: { type: String, required: true }, // mới thêm, oke không???
     product_description: { type: String, required: true },
     product_display: { type: Boolean, required: true, default: false },
     product_famous: { type: Boolean, required: true, default: false },
@@ -25,6 +26,8 @@ const productSchema = new mongoose.Schema(
     product_feedback: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feedback" }],
     product_selled: { type: Number, required: true },
     product_percent_discount: { type: Number },
+    product_price: { type: Number, required: true, default: 0},
+    product_countInStock: { type: Number, required: true, default: 0 },
     is_delete: { type: Boolean, default: false },
     variants: [variantSchema],
     slug: { 

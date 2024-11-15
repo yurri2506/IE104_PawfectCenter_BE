@@ -5,7 +5,7 @@ dotenv.config();
 const routes = require('./routes')
 const app = express();
 const bodyParser = require('body-parser')
-const port = process.env.PORT || 3001
+const port = process.env.PORT || 3000
 const slug = require("mongoose-slug-generator");
 
 mongoose.plugin(slug);

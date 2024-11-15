@@ -3,68 +3,112 @@ const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
 
 // Tạo sản phẩm
-const createProduct = (newProduct) => {
+const createProduct = (orderData) => {
   return new Promise(async (resolve, reject) => {
     const {
-      product_title,
-      product_category,
-      product_images,
-      product_description,
-      product_display,
-      product_famous,
-      product_rate = 0,
-      product_feedback,
-      product_selled,
-      product_percent_discount,
-      variants,
-      slug,
-    } = newProduct;
+      discount_ids,
+      user_id,
+      shipping_fee,
+      shipping_address,
+      products,
+      order_status,
+      order_payment,
+      order_delivery_date,
+      estimated_delivery_date,
+      order_note,
+    } = orderData;
 
     try {
-      const checkProductTitle = await Product.findOne({ product_title });
-      if (checkProductTitle !== null) {
-        return resolve({
-          status: "ERR",
-          message: "Sản phẩm đã tồn tại.",
+      // 1. Tính toán tổng giá trị đơn hàng trước khi áp dụng chiết khấu
+      let orderTotalBefore = 0;
+      const productDetails = await Promise.all(
+        products.map(async (product) => {
+          const productInfo = await Product.findById(product.product_id).populate('product_category');
+          if (!productInfo) {
+            return resolve({
+              status: "ERR",
+              message: `Không tìm thấy sản phẩm với ID: ${product.product_id}`,
+            });
+          }
+
+          // Tìm giá của biến thể sản phẩm (nếu có), nếu không, dùng giá sản phẩm
+          const price = productInfo.variants.find(variant => variant._id.equals(product.variant_id))?.product_price || productInfo.price;
+          const totalPrice = price * product.quantity;
+          orderTotalBefore += totalPrice;
+
+          return {
+            ...product,
+            price,
+            total_price: totalPrice,
+            product_category: productInfo.product_category
+          };
+        })
+      );
+
+      // 2. Tính toán chiết khấu dựa trên mã giảm giá và điều kiện áp dụng
+      let productDiscount = 0;
+      let shippingDiscount = 0;
+
+      if (discount_ids && discount_ids.length > 0) {
+        const discounts = await Discount.find({ _id: { $in: discount_ids } });
+
+        discounts.forEach((discount) => {
+          const applicableCondition = discount.discount_condition.find(condition => {
+            const isCategoryMatched = condition.category_id.some(category => 
+              productDetails.some(product => product.product_category && product.product_category.equals(category))
+            );
+            return isCategoryMatched && orderTotalBefore >= condition.price_total_order;
+          });
+
+          // Nếu điều kiện áp dụng mã giảm giá thỏa mãn
+          if (applicableCondition) {
+            const discountValue = (orderTotalBefore * discount.discount_number) / 100;
+            if (discount.discount_type === 'product') {
+              productDiscount = Math.max(productDiscount, discountValue);
+            } else if (discount.discount_type === 'shipping') {
+              shippingDiscount = Math.max(shippingDiscount, discountValue);
+            }
+          }
         });
       }
 
-      const checkProductCategory = await Category.findById(product_category);
-      if (checkProductCategory == null) {
-        return resolve({
-          status: "ERR",
-          message: "Danh mục sản phẩm không tồn tại.",
-        });
-      }
+      // 3. Tính tổng đơn hàng sau khi áp dụng chiết khấu và phí vận chuyển
+      const orderTotalAfter = orderTotalBefore - productDiscount + (shipping_fee || 0) - shippingDiscount;
 
-      const newProductData = {
-        product_title,
-        product_category,
-        product_images,
-        product_description,
-        product_display,
-        product_famous,
-        product_rate,
-        product_feedback,
-        product_selled,
-        product_percent_discount,
-        variants,
-        slug,
+      // 4. Chuẩn bị dữ liệu để lưu đơn hàng
+      const newOrderData = {
+        discount_ids,
+        user_id,
+        shipping_fee,
+        shipping_address,
+        products: productDetails,
+        order_status,
+        order_payment,
+        order_delivery_date,
+        estimated_delivery_date,
+        order_total_before: orderTotalBefore,
+        order_total_after: orderTotalAfter,
+        order_note,
+        discount_applied: {
+          productDiscount,
+          shippingDiscount
+        }
       };
 
-      const newProductInstance = await Product.create(newProductData);
+      // 5. Tạo và lưu đơn hàng
+      const newOrderInstance = await Order.create(newOrderData);
 
-      if (newProductInstance) {
+      if (newOrderInstance) {
         return resolve({
           status: "OK",
-          message: "Sản phẩm đã được tạo thành công",
-          data: newProductInstance,
+          message: "Đơn hàng đã được tạo thành công",
+          data: newOrderInstance,
         });
       }
     } catch (e) {
       reject({
         status: "ERR",
-        message: e.message || "Đã xảy ra lỗi khi tạo sản phẩm",
+        message: e.message || "Đã xảy ra lỗi khi tạo đơn hàng",
       });
     }
   });

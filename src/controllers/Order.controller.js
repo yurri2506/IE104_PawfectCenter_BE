@@ -1,111 +1,93 @@
-const CategoryService = require("../services/Order.service");
-const slugify = require("slugify");
-const crypto = require("crypto");
+const OrderService = require("../services/Order.service");
 
-const createCOrder = async (req, res) => {
+const createOrder = async (req, res) => {
   try {
     const {
-      category_title,
-      category_parent_id,
-      category_level,
-      isActive,
+      discount_ids,
+      user_id,
+      shipping_fee,
+      shipping_address,
+      products,
+      order_status,
+      order_payment,
+      order_delivery_date,
+      estimated_delivery_date,
+      order_total_before,
+      order_total_after,
+      order_note,
     } = req.body;
 
-    if (!category_title) {
-      return res.status(200).json({
+    if (!user_id || !shipping_address || !products || products.length === 0 ) {
+      return res.status(400).json({
         status: "ERR",
-        message: "Tên danh mục sản phẩm là bắt buộc",
+        message: "Thiếu thông tin cần thiết để tạo đơn hàng",
       });
     }
 
-    if (!category_parent_id) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Mã danh mục cha của sản phẩm là bắt buộc",
-      });
-    }
-
-    const slug = category_title
-      ? slugify(category_title, { lower: true, strict: true })
-      : crypto.randomBytes(6).toString("hex");
-
-    const newCategoryData = {
-      category_title,
-      category_parent_id,
-      category_level,
-      isActive,
-      slug,
+    const orderData = {
+      discount_ids,
+      user_id,
+      shipping_fee,
+      shipping_address,
+      products,
+      order_status,
+      order_payment,
+      order_delivery_date,
+      estimated_delivery_date,
+      order_total_before,
+      order_total_after,
+      order_note,
     };
-
-    const response = await CategoryService.createCategory(newCategoryData);
+    const response = await OrderService.createOrder(orderData);
     return res.status(200).json(response);
   } catch (error) {
     return res
       .status(500)
-      .json({ message: error.message || "Lỗi khi tạo sản phẩm" });
+      .json({ message: error.message || "Lỗi khi tạo đơn hàng" });
   }
 };
 
-// const updateCategory = async (req, res) => {
-//   try {
-//     const categoryId = req.params.id;
-//     const data = req.body;
-//     if (!data) {
-//       return res.status(200).json({
-//         status: "ERR",
-//         message: "Thông tin cập nhật không có",
-//       });
-//     }
-//     if (!categoryId) {
-//       return res.status(200).json({
-//         status: "ERR",
-//         message: "ID danh mục sản phẩm là bắt buộc",
-//       });
-//     }
-//     const response = await CategoryService.updateCategory(categoryId, data);
-//     return res.status(200).json(response);
-//   } catch (e) {
-//     return res.status(404).json({
-//       message: e,
-//     });
-//   }
-// };
+const updateOrder = async (req, res) => {
+  try {
+    const response = await OrderService.updateOrder(req.params.id, req.body);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "Đã xảy ra lỗi khi cập nhật đơn hàng",
+    });
+  }
+};
 
-// const deleteCategory = async (req, res) => {
-//   try {
-//     const categoryId = req.params.id;
-//     if (!categoryId) {
-//       return res.status(400).json({
-//         status: "ERR",
-//         message: "The categoryId is required",
-//       });
-//     }
+const getOrderDetails = async (req, res) => {
+  try {
+    const response = await OrderService.getOrderDetails(req.params.id);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "Đã xảy ra lỗi khi lấy thông tin chi tiết đơn hàng",
+    });
+  }
+};
 
-//     const response = await CategoryService.deleteCategory(categoryId);
-
-//     return res.status(200).json(response);
-//   } catch (e) {
-//     return res.status(500).json({
-//       status: "ERR",
-//       message: e.message || "An error occurred while deleting the category.",
-//     });
-//   }
-// };
-
-// const getTypeCategory = async (req, res) => {
-//   try {
-//     const response = await CategoryService.getTypeCategory();
-//     return res.status(200).json(response);
-//   } catch (e) {
-//     return res.status(500).json({
-//       status: "ERR",
-//       message: e.message || "Error while fetching categories",
-//     });}
-// };
+const getUserOrders = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const status = req.query.status; // Trạng thái đơn hàng có thể lọc từ query
+    const response = await OrderService.getUserOrders(userId, status);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng",
+    });
+  }
+};
 
 module.exports = {
-  createCOrder,
-  // updateCategory,
-  // deleteCategory,
-  // getTypeCategory,
+  createOrder,
+  updateOrder,
+  getOrderDetails,
+  getUserOrders,
 };

@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema(
       ref: 'User', 
       required: true 
     },
+    shipping_fee: { type: Number, required: true, default: 0 },
     shipping_address: {
       full_name: { type: String, required: true }, 
       phone: { type: String, required: true },
@@ -20,14 +21,13 @@ const orderSchema = new mongoose.Schema(
         province: { type: String, required: true }, 
         district: { type: String, required: true }, 
         commune: { type: String, required: true } 
-      },
-      required: true 
+      }
     },
     products: [
       {
-        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true }, 
-        quantity: { type: Number, required: true, default: 1}, 
-        model: {type: String},
+        product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true }, 
+        quantity: { type: Number, required: true, default: 1},  
+        variant: {type: mongoose.Schema.Types.ObjectId, required: true},
         status: { 
           type: String, 
           enum: ['Giao hàng thành công', 'Hoàn hàng'], 
@@ -48,6 +48,9 @@ const orderSchema = new mongoose.Schema(
     order_delivery_date: { 
       type: Date 
     },
+    estimated_delivery_date: { 
+      type: Date 
+    },
     order_total_before: { 
       type: Number, 
       required: true  
@@ -55,10 +58,12 @@ const orderSchema = new mongoose.Schema(
     order_total_after: { 
       type: Number, 
       required: true  
-    }
+    },
+    order_note: { type: String }
   },
   {
-    timestamps: true 
+    timestamps: true, 
+    collection: 'Order' 
   }
 );
 

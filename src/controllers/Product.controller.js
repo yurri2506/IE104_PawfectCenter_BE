@@ -72,27 +72,52 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-    const data = req.body;
+
     if (!productId) {
       return res.status(200).json({
         status: "ERR",
         message: "The productId is required",
       });
     }
-    if (!data) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Thông tin cập nhật không có",
-      });
+
+    // Xử lý ảnh sản phẩm mới nếu có
+    let product_images = req.files["product_images"]?.map((file) => {
+      return file.buffer.toString("base64");
+    });
+
+    // Nếu không có ảnh mới, giữ nguyên ảnh cũ từ cơ sở dữ liệu
+    if (!product_images || product_images.length === 0) {
+      const existingProduct = await ProductService.getProductById(productId);
+      product_images = existingProduct.product_images;
     }
-    const response = await ProductService.updateProduct(productId, data);
+
+    // Xử lý cập nhật ảnh cho các biến thể nếu có
+    const parsedVariants = data.variants ? JSON.parse(data.variants) : [];
+    const updatedVariants = parsedVariants.map((variant, index) => {
+      const variantFile = req.files[`variant_img_${index}`]?.[0];
+      if (variantFile) {
+        variant.variant_img = variantFile.buffer.toString("base64");
+      }
+      return variant;
+    });
+
+    // Xây dựng dữ liệu cập nhật
+    const updateData = {
+      ...req.body,
+      product_images,
+      variants: updatedVariants
+    };
+
+    const response = await ProductService.updateProduct(productId, updateData);
     return res.status(200).json(response);
   } catch (e) {
-    return res.status(404).json({
-      message: e,
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "Lỗi khi cập nhật sản phẩm",
     });
   }
 };
+
 
 const deleteProduct = async (req, res) => {
   try {
