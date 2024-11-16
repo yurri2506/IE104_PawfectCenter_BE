@@ -16,7 +16,7 @@ const routes = (app) => {
     app.use('/api/category', CategoryRouter)
     app.use('/api/order', OrderRouter)
     // app.use('/api/admin', AdminRouter)
-    // app.use('/api/cart', CartRouter)
+    app.use('/api/cart', CartRouter)
     app.use('/api/discount', DiscountRouter)
     app.use('/api/feedback', FeedbackRouter)
     // app.use('/api/favorited', FavoritedRouter)

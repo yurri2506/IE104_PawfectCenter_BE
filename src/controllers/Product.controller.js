@@ -22,6 +22,7 @@ const createProduct = async (req, res) => {
       product_famous,
       product_rate = 0,
       product_selled,
+      product_brand,
       product_percent_discount,
       variants,
     } = req.body;
@@ -55,6 +56,7 @@ const createProduct = async (req, res) => {
       product_famous,
       product_rate,
       product_selled,
+      product_brand,
       product_percent_discount,
       variants: updatedVariants,
       slug,
