@@ -3,6 +3,7 @@ const Product = require("../models/Product.model");
 const Order = require("../models/Order.model");
 const Discount = require('../models/Discount.model');
 const Cart = require('../models/Cart.model');
+const CartService = require("../services/Cart.service");
 
 // Tạo đơn hàng -- chưa test
 const createOrder = async (newOrder) => {
@@ -142,27 +143,16 @@ const createOrder = async (newOrder) => {
         );
 
         // Bước 5: Cập nhật giỏ hàng của người dùng, đặt số lượng = 0 cho các sản phẩm đã mua
-        await Promise.all(
-          products.map(async (product) => {
-            await Cart.updateOne(
-              { user_id: user_id },
-              {
-                $set: {
-                  "products.$[elem].quantity": 0,
-                },
-              },
-              {
-                arrayFilters: [
-                  {
-                    "elem.product_id": product.product_id,
-                    "elem.variant": product.variant,
-                  },
-                ],
-              }
-            );
-          })
-        );
-
+        const cart = await Cart.findOne({ user_id: user_id });
+        if (cart) {
+          await CartService.updateCart(cart._id, {
+            products: products.map((product) => ({
+              product_id: product.product_id,
+              variant: product.variant,
+              quantity: 0,
+            })),
+          });
+        }
         return resolve({
           status: "OK",
           message: "Đơn hàng đã được tạo thành công",
