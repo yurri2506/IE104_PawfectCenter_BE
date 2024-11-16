@@ -293,10 +293,107 @@ const previewOrder = async (newOrder) => {
   });
 };
 
+const updateOrder = async (orderId, updatedData) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return {
+        status: "ERR",
+        message: "ID đơn hàng không hợp lệ",
+      };
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedOrder) {
+      return {
+        status: "ERR",
+        message: "Không tìm thấy đơn hàng để cập nhật",
+      };
+    }
+
+    return {
+      status: "OK",
+      message: "Cập nhật đơn hàng thành công",
+      data: updatedOrder,
+    };
+  } catch (e) {
+    return {
+      status: "ERR",
+      message: e.message || "Đã xảy ra lỗi khi cập nhật đơn hàng",
+    };
+  }
+};
+
+const getOrderDetails = async (orderId) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return {
+        status: "ERR",
+        message: "ID đơn hàng không hợp lệ",
+      };
+    }
+
+    const orderDetails = await Order.findById(orderId);
+
+    if (!orderDetails) {
+      return {
+        status: "ERR",
+        message: "Không tìm thấy đơn hàng",
+      };
+    }
+
+    return {
+      status: "OK",
+      message: "Lấy thông tin đơn hàng thành công",
+      data: orderDetails,
+    };
+  } catch (e) {
+    return {
+      status: "ERR",
+      message: e.message || "Đã xảy ra lỗi khi lấy thông tin đơn hàng",
+    };
+  }
+};
+
+const getOrdersByStatus = async (orderStatus) => {
+  try {
+    let filter = {};
+    if (orderStatus) {
+      if (orderStatus.toLowerCase() === "all") {
+        filter = {}; // Lấy tất cả đơn hàng
+      } else if (['Chờ xác nhận', 'Đang chuẩn bị hàng', 'Đang giao', 'Giao hàng thành công', 'Hoàn hàng'].includes(orderStatus)) {
+        filter = { order_status: orderStatus }; // Lọc theo trạng thái đơn hàng
+      } else {
+        throw new Error("Không có đơn hàng thuộc trạng thái đã yêu cầu hoặc trạng thái không hợp lệ");
+      }
+    }
+
+    const orders = await Order.find(filter);
+    if (orders.length === 0) {
+      throw new Error("Không có đơn hàng thỏa mãn yêu cầu");
+    }
+
+    return {
+      status: "OK",
+      message: "Lấy danh sách đơn hàng thành công",
+      data: orders,
+    };
+  } catch (e) {
+    return {
+      status: "ERR",
+      message: e.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng",
+    };
+  }
+};
+
 module.exports = {
   createOrder,
-  // updateOrder,
-  // getOrderDetails,
+  updateOrder,
+  getOrderDetails,
   // getUserOrders,
-  previewOrder
+  previewOrder,
+  getOrdersByStatus,
 };

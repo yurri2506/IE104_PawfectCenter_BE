@@ -47,10 +47,51 @@ const previewOrder = async (req, res) => {
   }
 };
 
+const updateOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const updatedData = req.body;
+    const response = await updateOrder(orderId, updatedData);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERR",
+      message: error.message || "Đã xảy ra lỗi khi cập nhật đơn hàng",
+    });
+  }
+};
+
+const getOrderDetails = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const response = await OrderService.getOrderDetails(orderId);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERR",
+      message: error.message || "Đã xảy ra lỗi khi lấy thông tin đơn hàng",
+    });
+  }
+}
+
+const getOrdersByStatus = async (req, res) => {
+  try {
+    const orderStatus = req.query.status;
+    const response = await OrderService.getOrdersByStatus(orderStatus);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERR",
+      message: error.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng",
+    });
+  }
+}
+
 module.exports = {
   createOrder,
-  // updateOrder,
-  // getOrderDetails,
+  updateOrder,
+  getOrderDetails,
   // getUserOrders,
   previewOrder,
+  getOrdersByStatus,
 };
