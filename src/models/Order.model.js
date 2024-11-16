@@ -28,10 +28,6 @@ const orderSchema = new mongoose.Schema(
         product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true }, 
         quantity: { type: Number, required: true, default: 1},  
         variant: {type: mongoose.Schema.Types.ObjectId, required: true},
-        status: { 
-          type: String, 
-          enum: ['Giao hàng thành công', 'Hoàn hàng'], 
-        }
       }
     ],
     order_status: { 
