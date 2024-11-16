@@ -34,9 +34,23 @@ const createOrder = async (req, res) => {
   }
 };
 
+const previewOrder = async (req, res) => {
+  try {
+    const newOrder = req.body;
+    const response = await OrderService.previewOrder(newOrder);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERR",
+      message: error.message || "Đã xảy ra lỗi khi xem trước đơn hàng",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   // updateOrder,
   // getOrderDetails,
   // getUserOrders,
+  previewOrder,
 };

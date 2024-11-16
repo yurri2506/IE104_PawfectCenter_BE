@@ -168,9 +168,135 @@ const createOrder = async (newOrder) => {
   });
 };
 
+const previewOrder = async (newOrder) => {
+  return new Promise(async (resolve, reject) => {
+    const {
+      discount_ids,
+      user_id,
+      shipping_fee,
+      shipping_address,
+      products,
+      order_status = "Chờ xác nhận",
+      order_payment,
+      order_delivery_date,
+      estimated_delivery_date,
+      order_note,
+    } = newOrder;
+
+    try {
+      if (!user_id || !shipping_address || !products || products.length === 0) {
+        return reject({
+          status: "ERR",
+          message: "Thiếu thông tin cần thiết để tạo đơn hàng",
+        });
+      }
+
+      // Bước 1: Duyệt qua các sản phẩm để tính giá trị trước khi giảm giá
+      let orderTotalBeforeDiscount = 0;
+      const productDetails = await Promise.all(
+        products.map(async (product) => {
+          const productInfo = await Product.findById(product.product_id);
+          if (!productInfo) {
+            throw new Error(`Không tìm thấy sản phẩm với ID: ${product.product_id}`);
+          }
+
+          const variant = productInfo.variants.find((v) => v._id.equals(product.variant));
+          let price = variant ? variant.product_price : productInfo.product_price;
+
+          if (isNaN(price)) {
+            throw new Error(`Giá sản phẩm với ID ${product.product_id} không hợp lệ.`);
+          }
+
+          // Áp dụng giảm giá của sản phẩm nếu có
+          if (productInfo.product_percent_discount) {
+            price = price * (1 - productInfo.product_percent_discount / 100);
+          }
+
+          const totalPrice = price * product.quantity;
+          orderTotalBeforeDiscount = orderTotalBeforeDiscount + totalPrice;
+
+          return {
+            ...product,
+            price,
+            total_price: totalPrice,
+            product_category: productInfo.product_category,
+          };
+        })
+      );
+
+      // Bước 2: Kiểm tra và áp dụng các mã giảm giá
+      let productDiscountValue = 0;
+      let shippingDiscountValue = 0;
+
+      if (discount_ids && discount_ids.length > 0) {
+        const discounts = await Discount.find({ _id: { $in: discount_ids } });
+
+        discounts.forEach((discount) => {
+          if (discount.discount_type === "shipping" && shipping_fee > 0) {
+            // Áp dụng giảm giá cho phí ship nếu thoả điều kiện
+            discount.discount_condition.forEach((condition) => {
+              if (orderTotalBeforeDiscount >= condition.price_total_order) {
+                shippingDiscountValue += (shipping_fee * discount.discount_number) / 100;
+              }
+            });
+          } else if (discount.discount_type === "product") {
+            // Áp dụng giảm giá cho sản phẩm nếu thoả điều kiện
+            discount.discount_condition.forEach((condition) => {
+              if (orderTotalBeforeDiscount >= condition.price_total_order) {
+                productDetails.forEach((product) => {
+                  if (condition.category_id.includes(product.product_category.toString())) {
+                    productDiscountValue += (product.total_price * discount.discount_number) / 100;
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+
+      // Bước 3: Tính tổng đơn hàng sau khi áp dụng giảm giá
+      const shippingFeeAfterDiscount = Math.max(0, shipping_fee - shippingDiscountValue);
+      const orderTotalAfterDiscount = orderTotalBeforeDiscount - productDiscountValue + shippingFeeAfterDiscount;
+
+      // Chuẩn bị dữ liệu để xem trước đơn hàng
+      const previewOrderData = {
+        discount_ids,
+        user_id,
+        shipping_fee: shippingFeeAfterDiscount,
+        shipping_address,
+        products: productDetails,
+        order_status,
+        order_payment,
+        order_delivery_date,
+        estimated_delivery_date,
+        order_note,
+        order_total_before: orderTotalBeforeDiscount,
+        order_total_after: orderTotalAfterDiscount,
+        discount_applied: {
+          product_discount: productDiscountValue,
+          shipping_discount: shippingDiscountValue,
+        },
+      };
+
+      // Trả về dữ liệu để xem trước đơn hàng mà không lưu vào database
+      return resolve({
+        status: "OK",
+        message: "Xem trước đơn hàng thành công",
+        data: previewOrderData,
+      });
+    } catch (e) {
+      return reject({
+        status: "ERR",
+        message: e.message || "Đã xảy ra lỗi khi xem trước đơn hàng",
+      });
+    }
+  });
+};
+
 module.exports = {
   createOrder,
   // updateOrder,
   // getOrderDetails,
   // getUserOrders,
+  previewOrder
 };
