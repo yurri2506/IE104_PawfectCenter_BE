@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product.model");
 const Order = require("../models/Order.model");
-const Discount = require('../models/Discount.model');
-const Cart = require('../models/Cart.model');
+const Discount = require("../models/Discount.model");
+const Cart = require("../models/Cart.model");
 const CartService = require("../services/Cart.service");
 
 // Tạo đơn hàng -- chưa test
@@ -35,14 +35,22 @@ const createOrder = async (newOrder) => {
         products.map(async (product) => {
           const productInfo = await Product.findById(product.product_id);
           if (!productInfo) {
-            throw new Error(`Không tìm thấy sản phẩm với ID: ${product.product_id}`);
+            throw new Error(
+              `Không tìm thấy sản phẩm với ID: ${product.product_id}`
+            );
           }
 
-          const variant = productInfo.variants.find((v) => v._id.equals(product.variant));
-          let price = variant ? variant.product_price : productInfo.product_price;
+          const variant = productInfo.variants.find((v) =>
+            v._id.equals(product.variant)
+          );
+          let price = variant
+            ? variant.product_price
+            : productInfo.product_price;
 
           if (isNaN(price)) {
-            throw new Error(`Giá sản phẩm với ID ${product.product_id} không hợp lệ.`);
+            throw new Error(
+              `Giá sản phẩm với ID ${product.product_id} không hợp lệ.`
+            );
           }
 
           // Áp dụng giảm giá của sản phẩm nếu có
@@ -74,7 +82,8 @@ const createOrder = async (newOrder) => {
             // Áp dụng giảm giá cho phí ship nếu thoả điều kiện
             discount.discount_condition.forEach((condition) => {
               if (orderTotalBeforeDiscount >= condition.price_total_order) {
-                shippingDiscountValue += (shipping_fee * discount.discount_number) / 100;
+                shippingDiscountValue +=
+                  (shipping_fee * discount.discount_number) / 100;
               }
             });
           } else if (discount.discount_type === "product") {
@@ -82,8 +91,13 @@ const createOrder = async (newOrder) => {
             discount.discount_condition.forEach((condition) => {
               if (orderTotalBeforeDiscount >= condition.price_total_order) {
                 productDetails.forEach((product) => {
-                  if (condition.category_id.includes(product.product_category.toString())) {
-                    productDiscountValue += (product.total_price * discount.discount_number) / 100;
+                  if (
+                    condition.category_id.includes(
+                      product.product_category.toString()
+                    )
+                  ) {
+                    productDiscountValue +=
+                      (product.total_price * discount.discount_number) / 100;
                   }
                 });
               }
@@ -93,8 +107,14 @@ const createOrder = async (newOrder) => {
       }
 
       // Bước 3: Tính tổng đơn hàng sau khi áp dụng giảm giá
-      const shippingFeeAfterDiscount = Math.max(0, shipping_fee - shippingDiscountValue);
-      const orderTotalAfterDiscount = orderTotalBeforeDiscount - productDiscountValue + shippingFeeAfterDiscount;
+      const shippingFeeAfterDiscount = Math.max(
+        0,
+        shipping_fee - shippingDiscountValue
+      );
+      const orderTotalAfterDiscount =
+        orderTotalBeforeDiscount -
+        productDiscountValue +
+        shippingFeeAfterDiscount;
 
       // Chuẩn bị dữ liệu để tạo đơn hàng
       const newOrderData = {
@@ -133,9 +153,12 @@ const createOrder = async (newOrder) => {
           products.map(async (product) => {
             const productInfo = await Product.findById(product.product_id);
             if (productInfo) {
-              const variantIndex = productInfo.variants.findIndex((v) => v._id.equals(product.variant));
+              const variantIndex = productInfo.variants.findIndex((v) =>
+                v._id.equals(product.variant)
+              );
               if (variantIndex !== -1) {
-                productInfo.variants[variantIndex].product_countInStock -= product.quantity;
+                productInfo.variants[variantIndex].product_countInStock -=
+                  product.quantity;
               }
               await productInfo.save();
             }
@@ -197,14 +220,22 @@ const previewOrder = async (newOrder) => {
         products.map(async (product) => {
           const productInfo = await Product.findById(product.product_id);
           if (!productInfo) {
-            throw new Error(`Không tìm thấy sản phẩm với ID: ${product.product_id}`);
+            throw new Error(
+              `Không tìm thấy sản phẩm với ID: ${product.product_id}`
+            );
           }
 
-          const variant = productInfo.variants.find((v) => v._id.equals(product.variant));
-          let price = variant ? variant.product_price : productInfo.product_price;
+          const variant = productInfo.variants.find((v) =>
+            v._id.equals(product.variant)
+          );
+          let price = variant
+            ? variant.product_price
+            : productInfo.product_price;
 
           if (isNaN(price)) {
-            throw new Error(`Giá sản phẩm với ID ${product.product_id} không hợp lệ.`);
+            throw new Error(
+              `Giá sản phẩm với ID ${product.product_id} không hợp lệ.`
+            );
           }
 
           // Áp dụng giảm giá của sản phẩm nếu có
@@ -236,7 +267,8 @@ const previewOrder = async (newOrder) => {
             // Áp dụng giảm giá cho phí ship nếu thoả điều kiện
             discount.discount_condition.forEach((condition) => {
               if (orderTotalBeforeDiscount >= condition.price_total_order) {
-                shippingDiscountValue += (shipping_fee * discount.discount_number) / 100;
+                shippingDiscountValue +=
+                  (shipping_fee * discount.discount_number) / 100;
               }
             });
           } else if (discount.discount_type === "product") {
@@ -244,8 +276,13 @@ const previewOrder = async (newOrder) => {
             discount.discount_condition.forEach((condition) => {
               if (orderTotalBeforeDiscount >= condition.price_total_order) {
                 productDetails.forEach((product) => {
-                  if (condition.category_id.includes(product.product_category.toString())) {
-                    productDiscountValue += (product.total_price * discount.discount_number) / 100;
+                  if (
+                    condition.category_id.includes(
+                      product.product_category.toString()
+                    )
+                  ) {
+                    productDiscountValue +=
+                      (product.total_price * discount.discount_number) / 100;
                   }
                 });
               }
@@ -255,8 +292,14 @@ const previewOrder = async (newOrder) => {
       }
 
       // Bước 3: Tính tổng đơn hàng sau khi áp dụng giảm giá
-      const shippingFeeAfterDiscount = Math.max(0, shipping_fee - shippingDiscountValue);
-      const orderTotalAfterDiscount = orderTotalBeforeDiscount - productDiscountValue + shippingFeeAfterDiscount;
+      const shippingFeeAfterDiscount = Math.max(
+        0,
+        shipping_fee - shippingDiscountValue
+      );
+      const orderTotalAfterDiscount =
+        orderTotalBeforeDiscount -
+        productDiscountValue +
+        shippingFeeAfterDiscount;
 
       // Chuẩn bị dữ liệu để xem trước đơn hàng
       const previewOrderData = {
@@ -302,10 +345,66 @@ const updateOrder = async (orderId, updatedData) => {
       };
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(orderId, updatedData, {
-      new: true,
-      runValidators: true,
-    });
+    // Lấy thông tin đơn hàng hiện tại
+    const existingOrder = await Order.findById(orderId);
+    if (!existingOrder) {
+      return {
+        status: "ERR",
+        message: "Không tìm thấy đơn hàng để cập nhật",
+      };
+    }
+
+    // Nếu trạng thái thay đổi thành "Hủy hàng" hoặc "Hoàn hàng"
+    if (
+      updatedData.order_status &&
+      ["Hủy hàng", "Hoàn hàng"].includes(updatedData.order_status)
+    ) {
+      const products = existingOrder.products;
+
+      // Duyệt qua các sản phẩm và thêm lại số lượng kho
+      await Promise.all(
+        products.map(async (product) => {
+          const productInfo = await Product.findById(product.product_id);
+
+          if (!productInfo) {
+            throw new Error(
+              `Không tìm thấy sản phẩm với ID: ${product.product_id}`
+            );
+          }
+
+          // Tìm biến thể dựa trên variant_id
+          const variantIndex = productInfo.variants.findIndex((v) =>
+            v._id.equals(product.variant)
+          );
+
+          if (variantIndex === -1) {
+            throw new Error(
+              `Không tìm thấy biến thể với ID: ${product.variant} của sản phẩm ${product.product_id}`
+            );
+          }
+
+          // Thêm số lượng kho của biến thể
+          productInfo.variants[variantIndex].product_countInStock +=
+            product.quantity;
+
+          // Lưu thay đổi vào cơ sở dữ liệu
+          await productInfo.save();
+        })
+      );
+    }
+
+    // Cập nhật trạng thái đơn hàng
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        ...updatedData,
+        order_status: updatedData.order_status, 
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updatedOrder) {
       return {
@@ -316,7 +415,7 @@ const updateOrder = async (orderId, updatedData) => {
 
     return {
       status: "OK",
-      message: "Cập nhật đơn hàng thành công",
+      message: `Đơn hàng đã được cập nhật trạng thái: ${updatedData.order_status}`,
       data: updatedOrder,
     };
   } catch (e) {
@@ -358,20 +457,40 @@ const getOrderDetails = async (orderId) => {
   }
 };
 
-const getOrdersByStatus = async (orderStatus) => {
+const getOrdersByStatus = async (orderStatus, userId) => {
   try {
     let filter = {};
+
+    // Xử lý lọc theo orderStatus
     if (orderStatus) {
       if (orderStatus.toLowerCase() === "all") {
         filter = {}; // Lấy tất cả đơn hàng
-      } else if (['Chờ xác nhận', 'Đang chuẩn bị hàng', 'Đang giao', 'Giao hàng thành công', 'Hoàn hàng'].includes(orderStatus)) {
-        filter = { order_status: orderStatus }; // Lọc theo trạng thái đơn hàng
+      } else if (
+        [
+          "Chờ xác nhận",
+          "Đang chuẩn bị hàng",
+          "Đang giao",
+          "Giao hàng thành công",
+          "Hoàn hàng",
+          "Hủy hàng",
+        ].includes(orderStatus)
+      ) {
+        filter.order_status = orderStatus; // Lọc theo trạng thái đơn hàng
       } else {
-        throw new Error("Không có đơn hàng thuộc trạng thái đã yêu cầu hoặc trạng thái không hợp lệ");
+        throw new Error(
+          "Không có đơn hàng thuộc trạng thái đã yêu cầu hoặc trạng thái không hợp lệ"
+        );
       }
     }
 
+    // Xử lý lọc theo userId (chỉ thêm nếu userId được cung cấp)
+    if (userId) {
+      filter.user_id = userId;
+    }
+
+    // Tìm đơn hàng theo filter
     const orders = await Order.find(filter);
+
     if (orders.length === 0) {
       throw new Error("Không có đơn hàng thỏa mãn yêu cầu");
     }
@@ -381,11 +500,8 @@ const getOrdersByStatus = async (orderStatus) => {
       message: "Lấy danh sách đơn hàng thành công",
       data: orders,
     };
-  } catch (e) {
-    return {
-      status: "ERR",
-      message: e.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng",
-    };
+  } catch (error) {
+    throw new Error(error.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng");
   }
 };
 

@@ -51,7 +51,25 @@ const updateCart = async (req, res) => {
   }
 };
 
+const getDetailsCart = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The userId is required",
+      });
+    }
+    const response = await CartService.getDetailsCart(userId);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 module.exports = {
   createCart,
   updateCart,
+  getDetailsCart,
 };

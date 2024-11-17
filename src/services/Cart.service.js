@@ -90,7 +90,32 @@ const updateCart = async (cartId, data) => {
   }
 };
 
+const getDetailsCart = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await Cart.findOne({
+        user_id: id,
+      });
+      if (user === null) {
+        resolve({
+          status: "ERR",
+          message: "The user is not defined",
+        });
+      }
+
+      resolve({
+        status: "OK",
+        message: "Lấy thông giỏ hàng chi tiết thành công",
+        data: user,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 module.exports = {
   createCart,
   updateCart,
+  getDetailsCart,
 };
