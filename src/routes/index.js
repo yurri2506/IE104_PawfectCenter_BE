@@ -6,7 +6,7 @@ const AdminRouter = require('./Admin.router')
 const CartRouter = require('./Cart.router')
 const DiscountRouter = require('./Discount.router')
 const FeedbackRouter = require('./Feedback.router')
-const FavoritedRouter = require('./Favorited.router')
+const FavorRouter = require('./Favor.router')
 const StoreRouter = require('./Store.router')
 const NotificationRouter = require('./Notification.router')
 
@@ -19,7 +19,7 @@ const routes = (app) => {
     app.use('/api/cart', CartRouter)
     app.use('/api/discount', DiscountRouter)
     app.use('/api/feedback', FeedbackRouter)
-    app.use('/api/favorited', FavoritedRouter)
+    app.use('/api/favor', FavorRouter)
     app.use('/api/store', StoreRouter)
     // app.use('/api/notification', NotificationRouter)
 }   
