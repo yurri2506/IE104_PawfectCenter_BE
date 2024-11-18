@@ -148,7 +148,7 @@ const createOrder = async (newOrder) => {
           );
         }
 
-        // Cập nhật số lượng sản phẩm và biến thể
+        // Cập nhật số lượng sản phẩm và biến thể, cập nhật product_selled
         await Promise.all(
           products.map(async (product) => {
             const productInfo = await Product.findById(product.product_id);
@@ -160,6 +160,12 @@ const createOrder = async (newOrder) => {
                 productInfo.variants[variantIndex].product_countInStock -=
                   product.quantity;
               }
+              productInfo.product_selled += product.quantity;
+              // Cập nhật tổng số lượng tồn kho của sản phẩm từ các biến thể
+              productInfo.product_countInStock = productInfo.variants.reduce(
+                (acc, variant) => acc + variant.product_countInStock,
+                0
+              );
               await productInfo.save();
             }
           })
@@ -398,7 +404,7 @@ const updateOrder = async (orderId, updatedData) => {
       orderId,
       {
         ...updatedData,
-        order_status: updatedData.order_status, 
+        order_status: updatedData.order_status,
       },
       {
         new: true,
@@ -501,7 +507,9 @@ const getOrdersByStatus = async (orderStatus, userId) => {
       data: orders,
     };
   } catch (error) {
-    throw new Error(error.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng");
+    throw new Error(
+      error.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng"
+    );
   }
 };
 
