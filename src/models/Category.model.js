@@ -13,8 +13,9 @@ const CategorySchema = new mongoose.Schema(
     },
     slug: { 
       type: String, 
-      slug: "title",  //San pham 1 
-      unique: true
+      unique: true, 
+      required: true, 
+      default: function() { return ""; } // Đảm bảo `slug` không bị lưu null
     },
     category_level: {
       type: Number,
@@ -23,7 +24,11 @@ const CategorySchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    isDelete: {
+      type: Boolean,
+      default: false,
     },
   },
   {

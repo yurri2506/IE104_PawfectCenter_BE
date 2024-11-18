@@ -1,52 +1,52 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product.model");
-const Cart = require("../models/Cart.model");
+const Favor = require("../models/Favor.model");
 
-// Tạo cart
-const createCart = async (newCart) => {
+// Tạo favor
+const createFavor = async (newFavor) => {
   try {
-    const { user_id, products } = newCart;
+    const { user_id, products } = newFavor;
 
     // Kiểm tra nếu người dùng đã có giỏ hàng
-    const checkUserId = await Cart.findOne({ user_id: user_id });
+    const checkUserId = await Favor.findOne({ user_id: user_id });
     if (checkUserId) {
       return {
         status: "ERR",
-        message: "Người dùng đã tồn tại giỏ hàng.",
+        message: "Người dùng đã tồn tại giỏ hàng yêu thích.",
       };
     }
 
     // Tạo giỏ hàng mới
-    const newCartData = await Cart.create(newCart);
+    const newFavorData = await Favor.create(newFavor);
 
     return {
       status: "OK",
-      message: "Cart đã được tạo thành công",
-      data: newCartData,
+      message: "Favor đã được tạo thành công",
+      data: newFavorData,
     };
   } catch (e) {
     return {
       status: "ERR",
-      message: e.message || "Đã xảy ra lỗi khi tạo Cart",
+      message: e.message || "Đã xảy ra lỗi khi tạo Favor",
     };
   }
 };
 
-// Sửa cart
-const updateCart = async (cartId, data) => {
+// Sửa favor
+const updateFavor = async (favorId, data) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(cartId)) {
+    if (!mongoose.Types.ObjectId.isValid(favorId)) {
       return {
         status: "ERR",
         message: "ID giỏ hàng không hợp lệ",
       };
     }
 
-    const checkCartId = await Cart.findOne({ _id: cartId });
-    if (!checkCartId) {
+    const checkFavorId = await Favor.findOne({ _id: favorId });
+    if (!checkFavorId) {
       return {
         status: "ERR",
-        message: "Giỏ hàng của người dùng chưa có trong dữ liệu",
+        message: "Giỏ hàng yêu thích của người dùng chưa có trong dữ liệu",
       };
     }
 
@@ -75,25 +75,26 @@ const updateCart = async (cartId, data) => {
     });
 
     // Lưu giỏ hàng đã cập nhật
-    const updatedCart = await checkCartId.save();
+    const updatedFavor = await checkFavorId.save();
 
     return {
       status: "OK",
-      message: "Cập nhật Cart thành công",
-      data: updatedCart,
+      message: "Cập nhật Favor thành công",
+      data: updatedFavor,
     };
   } catch (e) {
     return {
       status: "ERR",
-      message: e.message || "Lỗi trong quá trình cập nhật giỏ hàng",
+      message: e.message || "Lỗi trong quá trình cập nhật giỏ hàng yêu thích",
     };
   }
 };
 
-const getAllProductByUserId = (id) => {
+// lấy thông tin favor
+const getDetailsFavor = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await Cart.findOne({
+      const user = await Favor.findOne({
         user_id: id,
       });
       if (user === null) {
@@ -105,7 +106,7 @@ const getAllProductByUserId = (id) => {
 
       resolve({
         status: "OK",
-        message: "Lấy thông giỏ hàng chi tiết thành công",
+        message: "Lấy thông giỏ hàng yêu thích chi tiết thành công",
         data: user,
       });
     } catch (e) {
@@ -114,24 +115,8 @@ const getAllProductByUserId = (id) => {
   });
 };
 
-const searchProductsInCart = async (userId, searchQuery) => {
-  try {
-    const cart = await Cart.findOne({ user_id: userId }).populate('products.product_id').populate('products.variant');
-    if (!cart) {
-      return { status: 'ERR', message: 'Cart not found', data: null };
-    }
-    const matchingProducts = cart.products.filter(product => 
-      product.product_id.product_title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    return { status: 'OK', message: 'Products retrieved successfully', data: matchingProducts };
-  } catch (error) {
-    return { status: 'ERR', message: error.message || 'Error retrieving products in cart', data: null };
-  }
-}
-
 module.exports = {
-  createCart,
-  updateCart,
-  getAllProductByUserId,
-  searchProductsInCart
+  createFavor,
+  updateFavor,
+  getDetailsFavor,
 };
