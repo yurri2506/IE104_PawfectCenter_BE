@@ -5,5 +5,5 @@ const {adminMiddleWare, authUserMiddleWare} = require('../middleware/AuthMiddleW
 
 router.put('/change-password/:id', authUserMiddleWare, staffController.changePassword)
 router.put('/update-staff/:id', authUserMiddleWare, staffController.updateStaff)
-
+router.post('/delete-staff/:id', authUserMiddleWare, staffController.deleteStaff)
 module.exports = router

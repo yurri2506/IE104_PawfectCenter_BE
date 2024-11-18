@@ -193,11 +193,45 @@ const getDetailStaff = (staffId)=>{
         }
     });
 };
+
+const deleteStaff = ( id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const staff = await Staff.findById(id)
+
+            if (!staff) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tài khoản không tồn tại'
+                });
+            }
+            
+            const updateStaff = await Staff.findByIdAndUpdate(
+                id, 
+                { 
+                    isDelete: true
+                },
+                {
+                    new: true
+                }
+            );
+
+            return resolve({
+                status: 'OK',
+                message: 'Thong tin duoc cap nhat thanh cong',
+                updateStaff: updateStaff
+            });
+        } catch (error) {
+            return reject(error);
+        }
+    });
+};
 module.exports = {
     createStaff,
     changePassword,
     updateStaff,
     getAllStaff,
     getDetailStaff,
-    updateRoleStaff
+    updateRoleStaff,
+    deleteStaff
 }

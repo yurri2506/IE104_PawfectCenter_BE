@@ -35,7 +35,24 @@ const updateStaff = async(req, res)=>{
         })
     }
 }
+
+
+const deleteStaff = async(req, res)=>{
+    const id =  req.params.id
+    try {
+
+        const response = await staffService.deleteStaff(id)
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     changePassword,
-    updateStaff
+    updateStaff,
+    deleteStaff
 }
