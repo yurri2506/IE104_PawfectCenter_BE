@@ -1,5 +1,8 @@
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const dotenv = require('dotenv')
+
+dotenv.config()
 
 const redisClient = require('./redis.service')
 
@@ -7,8 +10,8 @@ const redisClient = require('./redis.service')
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'phamquangvu2308@gmail.com', // thay bằng email của bạn
-    pass: 'osqm qrgm ddqh vmed'    // thay bằng mật khẩu của bạn
+    user: process.env.EMAIL,//'phamquangvu2308@gmail.com', // thay bằng email của bạn
+    pass: process.env.PASSWORD//'osqm qrgm ddqh vmed'    // thay bằng mật khẩu của bạn
   }
 });
 

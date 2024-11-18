@@ -1,4 +1,5 @@
 const User = require('../models/User.model')
+const Cart = require('../models/Cart.model')
 const bcrypt = require('bcrypt')
 const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
 const { messaging } = require('firebase-admin')
@@ -23,8 +24,12 @@ const signUpPhone = (newUser)=>{
                     user_name: name,
                     user_password: hash
                 })
+            
                 console.log(createUser)
                 if(createUser){
+                    await Cart.create({
+                    user_id: createUser._id
+                })
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
@@ -309,7 +314,7 @@ const deleteUser = (userId) =>{
                 data: userDelete
             })
         } catch (err) {
-            
+            return reject(e)
         }
     })
 }
@@ -385,6 +390,21 @@ const setAddressDefault = (userId, addressId)=>{
         }
     })
 }
+
+const getAllUser = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allUser = await User.find().sort({createdAt: -1, updatedAt: -1})
+            return resolve({
+                status: 'OK',
+                message: 'Success',
+                data: allUser
+            })
+        } catch (e) {
+            return reject(e)
+        }
+    })
+}
 module.exports = {
     signUpPhone,
     signUpEmail,
@@ -395,5 +415,6 @@ module.exports = {
     forgetPassword,
     deleteUser,
     addAddress,
-    setAddressDefault
+    setAddressDefault,
+    getAllUser
 }
