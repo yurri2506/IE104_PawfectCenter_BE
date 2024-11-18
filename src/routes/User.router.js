@@ -17,4 +17,5 @@ router.post('/delete-user/:id', authUserMiddleWare, userController.deleteUser)
 router.post('/add-address/:id', authUserMiddleWare, userController.addAddress)
 router.post('/:id/set-address-default/:address_id', authUserMiddleWare, userController.setAddressDefault)
 router.post('/sign-out' ,  userController.signOut)  
+router.post('/refresh-token' ,  userController.refreshToken) 
 module.exports = router

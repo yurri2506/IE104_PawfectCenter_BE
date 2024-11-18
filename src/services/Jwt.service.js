@@ -17,7 +17,7 @@ const genneralRefreshToken = async(payload) =>{
     return refreshToken
 }
 
-const refreshTokenServicce = async(refresh_token) =>{
+const refreshTokenService = async(refresh_token) =>{
 
     return new Promise(async(resolve, reject) => {
         try{
@@ -51,5 +51,5 @@ const refreshTokenServicce = async(refresh_token) =>{
 module.exports = {
     genneralAccessToken,
     genneralRefreshToken,
-    refreshTokenServicce
+    refreshTokenService
 }

@@ -2,6 +2,7 @@ const { response } = require("express")
 const userService = require("../services/User.service")
 const { changePasswordSchema } = require("../validations/ChangePassword.validate")
 const {userSignUpPhone, userSignUpEmail} = require('../validations/UserSignUp.validation')
+const JwtService = require('../services/Jwt.service')
 
 const signUpPhone = async(req, res)=>{
     try{
@@ -328,6 +329,25 @@ const signOut = async (req, res) => {
     }
 }
 
+const refreshToken = async (req, res) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
+        if (!token) {
+            return res.status(200).json({
+                status: 'ERR',
+                message: 'The token is required'
+            })
+        }
+        const response = await JwtService.refreshTokenService(token)
+        return res.status(200).json(response)
+    } catch (e) {
+        console.log(e)
+        return res.status(404).json({
+            message: e
+        })
+    }
+}
 
 module.exports = {
     signUpPhone,
@@ -340,5 +360,6 @@ module.exports = {
     deleteUser,
     addAddress,
     signOut,
-    setAddressDefault
+    setAddressDefault,
+    refreshToken
 }

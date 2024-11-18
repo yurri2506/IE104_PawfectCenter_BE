@@ -28,8 +28,8 @@ const signUpPhone = (newUser)=>{
                 console.log(createUser)
                 if(createUser){
                     await Cart.create({
-                        user_id: createUser._id
-                    })
+                    user_id: createUser._id
+                })
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
@@ -70,9 +70,6 @@ const signUpEmail = (newUser)=>{
                 })
                 console.log(createUser)
                 if(createUser){
-                    await Cart.create({
-                        user_id: createUser._id
-                    })
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
@@ -317,7 +314,7 @@ const deleteUser = (userId) =>{
                 data: userDelete
             })
         } catch (err) {
-            
+            return reject(e)
         }
     })
 }
@@ -393,6 +390,21 @@ const setAddressDefault = (userId, addressId)=>{
         }
     })
 }
+
+const getAllUser = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allUser = await User.find().sort({createdAt: -1, updatedAt: -1})
+            return resolve({
+                status: 'OK',
+                message: 'Success',
+                data: allUser
+            })
+        } catch (e) {
+            return reject(e)
+        }
+    })
+}
 module.exports = {
     signUpPhone,
     signUpEmail,
@@ -403,5 +415,6 @@ module.exports = {
     forgetPassword,
     deleteUser,
     addAddress,
-    setAddressDefault
+    setAddressDefault,
+    getAllUser
 }

@@ -91,7 +91,7 @@ const salesAgentMiddleWare = (req, res, next)=>{
             })
         }
         console.log(decode)
-        if (decode?.staff_role === 'Quản lý sản phẩm' || decode?.isAdmin) {
+        if (decode?.role?.includes('Quản lý sản phẩm') || decode?.isAdmin) {
             next()
         } else {
             return res.status(404).json({
