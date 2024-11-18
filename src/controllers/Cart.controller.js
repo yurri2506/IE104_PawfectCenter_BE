@@ -51,7 +51,7 @@ const updateCart = async (req, res) => {
   }
 };
 
-const getDetailsCart = async (req, res) => {
+const getAllProductByUserId = async (req, res) => {
   try {
     const userId = req.params.id;
     if (!userId) {
@@ -68,8 +68,20 @@ const getDetailsCart = async (req, res) => {
     });
   }
 };
+
+const searchProductsInCart = async (req, res) => {
+  const userId = req.params.userId;
+  const searchQuery = req.query.q;
+  try {
+    const response = await CartService.searchProductsInCart(userId, searchQuery);
+    return res.status(response.status === 'OK' ? 200 : 404).json(response);
+  } catch (error) {
+    return res.status(500).json({ status: 'ERR', message: error.message || 'Error while searching products in cart' });
+  }
+}
 module.exports = {
   createCart,
   updateCart,
-  getDetailsCart,
+  getAllProductByUserId,
+  searchProductsInCart,
 };

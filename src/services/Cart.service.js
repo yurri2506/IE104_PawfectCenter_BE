@@ -90,7 +90,7 @@ const updateCart = async (cartId, data) => {
   }
 };
 
-const getDetailsCart = (id) => {
+const getAllProductByUserId = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const user = await Cart.findOne({
@@ -114,8 +114,24 @@ const getDetailsCart = (id) => {
   });
 };
 
+const searchProductsInCart = async (userId, searchQuery) => {
+  try {
+    const cart = await Cart.findOne({ user_id: userId }).populate('products.product_id').populate('products.variant');
+    if (!cart) {
+      return { status: 'ERR', message: 'Cart not found', data: null };
+    }
+    const matchingProducts = cart.products.filter(product => 
+      product.product_id.product_title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return { status: 'OK', message: 'Products retrieved successfully', data: matchingProducts };
+  } catch (error) {
+    return { status: 'ERR', message: error.message || 'Error retrieving products in cart', data: null };
+  }
+}
+
 module.exports = {
   createCart,
   updateCart,
-  getDetailsCart,
+  getAllProductByUserId,
+  searchProductsInCart
 };
