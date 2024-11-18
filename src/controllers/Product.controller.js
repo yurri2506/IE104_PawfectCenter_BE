@@ -182,15 +182,20 @@ const getDetailsProduct = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
   try {
-    const { limit, page, sort, filter } = req.query;
+    const { limit, page, sort, filter, search } = req.query;
+
+    // Parse filter nếu có filter
     const parsedFilter = filter ? JSON.parse(filter) : {};
+
+    // Truyền thêm search (từ khóa tìm kiếm)
     const response = await ProductService.getAllProduct(
       Number(limit) || null,
       Number(page) || 0,
       sort,
-      parsedFilter
+      parsedFilter,
+      search
     );
-    
+
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({

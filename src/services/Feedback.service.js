@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Feedback = require("../models/Feedback.model");
-const Category = require("../models/Category.model");
+const Product = require("../models/Product.model");
 
 // Tạo feedback
 const createFeedback = async (newFeedback) => {
@@ -16,6 +16,18 @@ const createFeedback = async (newFeedback) => {
     } = newFeedback;
 
     const newFeedbackData = await Feedback.create(newFeedback);
+
+    if (newFeedbackData) {
+      const product = await Product.findById(product_id);
+      if (product) {
+        product.product_feedback.push(newFeedbackData._id);
+        // Tính lại số sao trung bình
+        const allFeedbacks = await Feedback.find({ product_id });
+        const totalRating = allFeedbacks.reduce((acc, feedback) => acc + feedback.rating, 0);
+        product.product_rate = totalRating / allFeedbacks.length;
+        await product.save();
+      }
+    }
 
     return {
       status: "OK",
@@ -53,6 +65,17 @@ const updateFeedback = async (id, data) => {
       runValidators: true,
     });
 
+    // Cập nhật lại rating của sản phẩm nếu feedback có thay đổi số sao
+    if (updatedFeedback && data.rating !== undefined) {
+      const product = await Product.findById(checkFeedback.product_id);
+      if (product) {
+        const allFeedbacks = await Feedback.find({ product_id: checkFeedback.product_id });
+        const totalRating = allFeedbacks.reduce((acc, feedback) => acc + feedback.rating, 0);
+        product.product_rate = totalRating / allFeedbacks.length;
+        await product.save();
+      }
+    }
+
     return {
       status: "OK",
       message: "Cập nhật feedback thành công",
@@ -85,6 +108,19 @@ const deleteFeedback = (id) => {
         status: "OK",
         message: "Delete Feedback success",
       });
+
+      // Xóa feedback ID khỏi sản phẩm và cập nhật lại rating
+      const product = await Product.findById(checkFeedback.product_id);
+      if (product) {
+        product.product_feedback = product.product_feedback.filter(
+          (feedbackId) => !feedbackId.equals(id)
+        );
+        const allFeedbacks = await Feedback.find({ product_id: checkFeedback.product_id });
+        const totalRating = allFeedbacks.length > 0 ? allFeedbacks.reduce((acc, feedback) => acc + feedback.rating, 0) / allFeedbacks.length : 0;
+        product.product_rate = totalRating;
+        await product.save();
+      }
+      
     } catch (e) {
       reject({
         status: "ERR",

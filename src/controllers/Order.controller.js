@@ -51,7 +51,7 @@ const updateOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
     const updatedData = req.body;
-    const response = await updateOrder(orderId, updatedData);
+    const response = await OrderService.updateOrder(orderId, updatedData);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
@@ -76,17 +76,21 @@ const getOrderDetails = async (req, res) => {
 
 const getOrdersByStatus = async (req, res) => {
   try {
-    const orderStatus = req.query.status;
-    const response = await OrderService.getOrdersByStatus(orderStatus);
-    return res.status(200).json(response);
+    const { orderStatus, userId } = req.query; // Lấy dữ liệu từ query parameters
+
+    // Gọi service để lấy dữ liệu
+    const result = await OrderService.getOrdersByStatus(orderStatus, userId);
+
+    // Trả về thành công
+    res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
+    // Xử lý lỗi và trả về phản hồi
+    res.status(400).json({
       status: "ERR",
-      message: error.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng",
+      message: error.message || "Đã xảy ra lỗi trong quá trình xử lý lấy đơn hàng",
     });
   }
-}
-
+};
 module.exports = {
   createOrder,
   updateOrder,

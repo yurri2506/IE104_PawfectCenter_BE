@@ -7,6 +7,6 @@ router.post('/preview', OrderController.previewOrder);
 router.patch('/update/:id', OrderController.updateOrder);
 router.get('/details/:id', OrderController.getOrderDetails);
 // router.delete('/delete/:id', OrderController.deleteOrder);
-router.get('/filter-status', OrderController.getOrdersByStatus);
+router.get('/filter-status', OrderController.getOrdersByStatus); // có thể truyền vào status và userId
 
 module.exports = router;

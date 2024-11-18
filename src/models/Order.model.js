@@ -32,7 +32,7 @@ const orderSchema = new mongoose.Schema(
     ],
     order_status: { 
       type: String, 
-      enum: ['Chờ xác nhận','Đang chuẩn bị hàng', 'Đang giao', 'Giao hàng thành công', 'Hoàn hàng'], 
+      enum: ['Chờ xác nhận','Đang chuẩn bị hàng', 'Đang giao', 'Giao hàng thành công', 'Hoàn hàng', 'Hủy hàng'], 
       default: 'Chờ xác nhận'
     },
     order_payment: { 
