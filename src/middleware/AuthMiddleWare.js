@@ -69,7 +69,7 @@ const authUserMiddleWare = (req, res, next)=>{
     })
 }
 
-const salesAgentMiddleWare = (req, res, next)=>{
+const productAgentMiddleWare = (req, res, next)=>{
     const authHeader = req.headers['authorization'];
     const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
     //const token = req.headers.token.split(' ')[1]
@@ -102,8 +102,110 @@ const salesAgentMiddleWare = (req, res, next)=>{
     })
 }
 
+const customerAgentMiddleWare = (req, res, next)=>{
+    const authHeader = req.headers['authorization'];
+    const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
+    //const token = req.headers.token.split(' ')[1]
+    console.log(token)
+    
+    if (!token) {
+        return res.status(401).json({
+            message: 'Token is required',
+            status: 'ERROR'
+        });
+    }
+
+    console.log(process.env.ACCESS_TOKEN) 
+    jwt.verify(token, process.env.ACCESS_TOKEN , function (err, decode){
+        if (err) {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+        console.log(decode)
+        if (decode?.role?.includes('Quản lý khách hàng') || decode?.isAdmin) {
+            next()
+        } else {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+    })
+}
+
+const orderAgentMiddleWare = (req, res, next)=>{
+    const authHeader = req.headers['authorization'];
+    const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
+    //const token = req.headers.token.split(' ')[1]
+    console.log(token)
+    
+    if (!token) {
+        return res.status(401).json({
+            message: 'Token is required',
+            status: 'ERROR'
+        });
+    }
+
+    console.log(process.env.ACCESS_TOKEN) 
+    jwt.verify(token, process.env.ACCESS_TOKEN , function (err, decode){
+        if (err) {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+        console.log(decode)
+        if (decode?.role?.includes('Quản lý đơn hàng') || decode?.isAdmin) {
+            next()
+        } else {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+    })
+}
+
+const feedbackAgentMiddleWare = (req, res, next)=>{
+    const authHeader = req.headers['authorization'];
+    const token = authHeader ? authHeader.split(' ')[1] : null; // Lấy phần token
+    //const token = req.headers.token.split(' ')[1]
+    console.log(token)
+    
+    if (!token) {
+        return res.status(401).json({
+            message: 'Token is required',
+            status: 'ERROR'
+        });
+    }
+
+    console.log(process.env.ACCESS_TOKEN) 
+    jwt.verify(token, process.env.ACCESS_TOKEN , function (err, decode){
+        if (err) {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+        console.log(decode)
+        if (decode?.role?.includes('Quản lý khách hàng') || decode?.isAdmin) {
+            next()
+        } else {
+            return res.status(404).json({
+                message: 'The authemtication',
+                status: 'ERROR'
+            })
+        }
+    })
+}
+
 module.exports={
     adminMiddleWare,
     authUserMiddleWare,
-    salesAgentMiddleWare
+    productAgentMiddleWare,
+    customerAgentMiddleWare,
+    orderAgentMiddleWare,
+    feedbackAgentMiddleWare
 }

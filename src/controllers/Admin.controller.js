@@ -2,7 +2,7 @@
 const adminService = require('../services/Admin.service')
 const userService = require('../services/User.service')
 const staffService = require('../services/Staff.service')
-
+const revenueService = require('../services/Revenue.service')
 const signIn = async(req, res) => {
     const {signInName, password} = req.body
     try {
@@ -213,6 +213,18 @@ const updateRoleStaff = async(req, res)=>{
         })
     }
 }
+
+const getRevenue = async(req, res) => {
+    try {
+        const response = await revenueService.getRevenue()
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
 module.exports = {
     signIn,
     createAdmin,
@@ -224,5 +236,6 @@ module.exports = {
     getAllStaff,
     getDetailStaff,
     getDetailAdmin,
-    updateRoleStaff 
+    updateRoleStaff,
+    getRevenue
 }
