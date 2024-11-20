@@ -22,7 +22,9 @@ const signUpPhone = (newUser)=>{
                 const createUser = await User.create({
                     user_phone: phone,
                     user_name: name,
-                    user_password: hash
+                    user_password: hash,
+                    user_avt_img: "",
+                    user_address: []
                 })
             
                 console.log(createUser)
@@ -90,20 +92,73 @@ const signUpEmail = (newUser)=>{
 
 
 const signIn = (signInUser) => {
+    // return new Promise(async (resolve, reject) => {
+    //     const { email, phone, password } = signInUser;
+    //     console.log(signInUser)
+    //     try {
+    //         let checkUser;
+
+    //         if (email) {
+    //             checkUser = await User.findOne({ user_email: email });
+    //         }
+
+    //         if (!checkUser && phone) {
+    //             checkUser = await User.findOne({ user_phone: phone });
+    //         }
+    //         console.log(checkUser)
+
+    //         if (!checkUser || checkUser.is_delete) {
+    //             return reject({
+    //                 status: 'ERROR',
+    //                 field: 'email_or_phone',
+    //                 message: 'Tài khoản chưa được đăng ký'
+    //             });
+    //         }
+
+    //         const isPasswordCorrect = await bcrypt.compare(password, checkUser.user_password);
+    //         if (!isPasswordCorrect) {
+    //             return reject({
+    //                 status: 'ERROR',
+    //                 field: 'isTruePass',
+    //                 message: 'Mật khẩu không chính xác'
+    //             });
+    //         }
+
+    //         const access_token = await genneralAccessToken({
+    //             id: checkUser.id
+    //         })
+    //         const refresh_token = await genneralRefreshToken({
+    //             id: checkUser.id
+    //         })
+
+    //         return resolve({
+    //             status: 'OK',
+    //             message: 'Đăng nhập thành công',
+    //             ACCESS_TOKEN: access_token,
+    //             REFRESH_TOKEN: refresh_token
+    //         });
+    //     } catch (err) {
+    //         reject({
+    //             status: 'ERROR',
+    //             message: 'Lỗi xảy ra khi đăng nhập',
+    //             error: err.message  // chỉ gửi chi tiết lỗi khi có lỗi hệ thống
+    //         });
+    //     }
+    // });
+
     return new Promise(async (resolve, reject) => {
-        const { email, phone, password } = signInUser;
+        const { identifier, password } = signInUser;
         console.log(signInUser)
         try {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             let checkUser;
-
-            if (email) {
-                checkUser = await User.findOne({ user_email: email });
+            if (emailRegex.test(identifier)) {
+                console.log(emailRegex.test(identifier))
+                checkUser = await User.findOne({ user_email: identifier });
+            } else if (/^\d+$/.test(identifier)) {
+                console.log(/^\d+$/.test(identifier))
+                checkUser = await User.findOne({ user_phone: identifier });
             }
-
-            if (!checkUser && phone) {
-                checkUser = await User.findOne({ user_phone: phone });
-            }
-            console.log(checkUser)
 
             if (!checkUser || checkUser.is_delete) {
                 return reject({
