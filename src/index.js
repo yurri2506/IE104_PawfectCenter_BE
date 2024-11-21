@@ -10,7 +10,8 @@ const slug = require("mongoose-slug-generator");
 
 mongoose.plugin(slug);
 
-
+const cors = require('cors');
+app.use(cors());
 app.use(bodyParser.json())
 
 routes(app);
