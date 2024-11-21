@@ -7,16 +7,20 @@ const JwtService = require('../services/Jwt.service')
 const signUpPhone = async(req, res)=>{
     try{
         console.log(req.body)
+        const {phone, name, password, confirmPassword} = req.body
+        // const {error} = userSignUpPhone.validate(req.body, {abortEarly: false})
 
-        const {error} = userSignUpPhone.validate(req.body, {abortEarly: false})
-
-        if(error){
+        if(!phone || !name || !password || !confirmPassword){
             return res.status(400).json({
                 status: 'ERROR',
-                errors: error.details.reduce((acc, detail) =>{
-                    acc[detail.context.key] = detail.message
-                    return acc
-                }, {})
+                message: 'Thong tin la bat buoc'
+            })
+        }
+
+        if(password !== confirmPassword){
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Mat khau khong khop'
             })
         }
 
@@ -123,7 +127,7 @@ const signIn = async(req, res) =>{
 
     }catch(err){
         return res.status(404).json({
-            message: err
+            err
         })
     }
 }

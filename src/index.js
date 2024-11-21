@@ -7,9 +7,10 @@ const app = express();
 const bodyParser = require('body-parser')
 const port = process.env.PORT || 3000
 const slug = require("mongoose-slug-generator");
-
+const cors = require('cors')
 mongoose.plugin(slug);
 
+app.use(cors())
 
 app.use(bodyParser.json())
 

@@ -162,7 +162,7 @@ const signIn = (signInUser) => {
 
             if (!checkUser || checkUser.is_delete) {
                 return reject({
-                    status: 'ERROR',
+                    statusCode: 400,
                     field: 'email_or_phone',
                     message: 'Tài khoản chưa được đăng ký'
                 });
@@ -171,7 +171,7 @@ const signIn = (signInUser) => {
             const isPasswordCorrect = await bcrypt.compare(password, checkUser.user_password);
             if (!isPasswordCorrect) {
                 return reject({
-                    status: 'ERROR',
+                    statusCode: 400,
                     field: 'isTruePass',
                     message: 'Mật khẩu không chính xác'
                 });
@@ -192,7 +192,7 @@ const signIn = (signInUser) => {
             });
         } catch (err) {
             reject({
-                status: 'ERROR',
+                statusCode: 500,
                 message: 'Lỗi xảy ra khi đăng nhập',
                 error: err.message  // chỉ gửi chi tiết lỗi khi có lỗi hệ thống
             });
