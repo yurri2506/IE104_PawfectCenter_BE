@@ -3,6 +3,7 @@ const Cart = require('../models/Cart.model')
 const bcrypt = require('bcrypt')
 const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
 const { messaging } = require('firebase-admin')
+const { google } = require('googleapis');
 
 const signUpPhone = (newUser)=>{
     return new Promise( async(resolve, reject)=>{
@@ -460,6 +461,59 @@ const getAllUser = () => {
         }
     })
 }
+
+const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_CALLBACK_URL
+);
+
+const signInGoogle = (googleToken) => {
+    return new Promise( async( resolve, reject) =>{
+        try {
+            const ticket = await oauth2Client.verifyIdToken({
+                idToken: googleToken,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+        
+            const payload = ticket.getPayload();
+            const { email, name, sub: googleId } = payload;
+        
+            let user = await User.findOne({ user_email: email });
+        
+            const hashedPassword = await bcrypt.hash("", 10);
+
+            if (!user) {
+                // Nếu chưa có, tạo mới người dùng
+                user = await User.create({
+                    user_email: email,
+                    user_name: name,
+                    google_id: googleId,
+                    user_address: [],
+                    user_password: hashedPassword
+                });
+            }
+
+            const access_token = await genneralAccessToken({
+                id: user.id
+            })
+            const refresh_token = await genneralRefreshToken({
+                id: user.id
+            })
+
+            return resolve({
+                status: 'OK',
+                message: 'Dang nhap thanh cong',
+                ACCESS_TOKEN: access_token,
+                REFRESH_TOKEN: refresh_token
+            })
+
+        } catch (error) {
+            return reject(error)
+        }
+    })
+    
+};
 module.exports = {
     signUpPhone,
     signUpEmail,
@@ -471,5 +525,6 @@ module.exports = {
     deleteUser,
     addAddress,
     setAddressDefault,
-    getAllUser
+    getAllUser,
+    signInGoogle
 }

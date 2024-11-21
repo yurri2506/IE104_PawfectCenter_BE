@@ -335,6 +335,28 @@ const refreshToken = async (req, res) => {
     }
 }
 
+const signInGoogle = async(req, res)=>{
+    try {
+        const {googleToken} = req.body
+
+        if(!googleToken){
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Google token la bat buoc'
+            })
+        }
+
+        const response = await userService.signInGoogle(googleToken)
+
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(400).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     signUpPhone,
     signUpEmail,
@@ -347,5 +369,6 @@ module.exports = {
     addAddress,
     signOut,
     setAddressDefault,
-    refreshToken
+    refreshToken,
+    signInGoogle
 }
