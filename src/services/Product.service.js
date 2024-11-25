@@ -231,41 +231,39 @@ const getDetailsProduct = (id) => {
   });
 };
 
-const getAllProduct = (limit, page, sort, filter = {}, search = "") => {
+const getAllProduct = (limit = 0, page = 0, sort = "", filters = {}, search = "") => {
   return new Promise(async (resolve, reject) => {
     try {
-      const query = { is_delete: false, product_display: true }; // Lọc các sản phẩm chưa bị xóa, đang hiển thị để bán
-
-      // Thêm logic tìm kiếm theo từ khóa (tìm trong tên sản phẩm)
+      const query = { is_delete: false, product_display: true }; // Lọc sản phẩm chưa bị xóa và đang hiển thị
+      // Thêm logic tìm kiếm theo từ khóa
       if (search) {
         query.product_title = { $regex: search, $options: "i" };
       }
 
-      // Lọc theo danh mục (category_id)
-      if (filter.category_id) {
-        query.product_category = filter.category_id;
+      // Lọc theo danh mục (product_category)
+      if (filters.product_category) {
+        query.product_category = filters.product_category;
       }
 
       // Lọc theo thương hiệu (product_brand)
-      if (filter.brand) {
-        query.product_brand = { $regex: filter.brand, $options: "i" };
+      if (filters.product_brand) {
+        query.product_brand = { $regex: filters.product_brand, $options: "i" };
       }
 
       // Lọc theo số sao đánh giá (product_rate)
-      if (filter.rating) {
-        query.product_rate = { $gte: filter.rating }; // Lọc sản phẩm có số sao lớn hơn hoặc bằng
+      if (filters.product_rate !== undefined) {
+        query.product_rate = { $gte: filters.product_rate }; // Lọc sản phẩm có số sao lớn hơn hoặc bằng
       }
 
       // Lọc theo số tuổi của thú cưng (pet_age)
-      if (filter.pet_age !== undefined) {
-        if (filter.pet_age === -1) {
-          // Tuổi nào cũng được, không thêm điều kiện
-        } else if (filter.pet_age === 0) {
+      if (filters.pet_age !== undefined) {
+        const petAge = Number(filters.pet_age);
+        if (petAge === -1) {
+          // Không lọc theo tuổi
+        } else if (petAge === 0) {
           query["variants.pet_age"] = { $lt: 1 }; // Dưới 1 tuổi
-        } else if (filter.pet_age === 1) {
-          query["variants.pet_age"] = { $gte: 1 }; // Trên 1 tuổi
-        } else if (filter.pet_age === 2) {
-          query["variants.pet_age"] = { $gte: 2 }; // Trên 2 tuổi
+        } else if (petAge >= 1) {
+          query["variants.pet_age"] = { $gte: petAge }; // Trên 1 tuổi hoặc hơn
         }
       }
 
@@ -299,7 +297,7 @@ const getAllProduct = (limit, page, sort, filter = {}, search = "") => {
         } else if (sort === "newest") {
           sortOptions = { createdAt: -1 }; // Sản phẩm mới nhất
         } else if (sort === "relevance") {
-          sortOptions = {}; // Trả về tất cả sản phẩm theo từ khóa mà không sắp xếp
+          sortOptions = {}; // Không sắp xếp
         }
       }
 
@@ -309,7 +307,7 @@ const getAllProduct = (limit, page, sort, filter = {}, search = "") => {
         .skip(skip)
         .sort(sortOptions)
         .populate("product_category", "category_name") // Populate tên danh mục từ ObjectId
-        .populate("product_feedback"); // Populate đánh giá sản phẩm nếu cần
+        .populate("product_feedback"); // Populate đánh giá sản phẩm
 
       resolve({
         status: "OK",
@@ -327,6 +325,7 @@ const getAllProduct = (limit, page, sort, filter = {}, search = "") => {
     }
   });
 };
+
 
 module.exports = {
   createProduct,
