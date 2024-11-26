@@ -133,7 +133,8 @@ const deleteFeedback = (id) => {
 const getAllFeedback = (productId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const feedbacks = await Feedback.find({ 'product_id': productId });
+      const feedbacks = await Feedback.find({ 'product_id': productId })
+      .populate('user_id', 'user_name user_avt_img')
       
       if (!feedbacks || feedbacks.length === 0) {
         return resolve({
