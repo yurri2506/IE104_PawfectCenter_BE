@@ -205,31 +205,66 @@ const changePassword = async(req, res) => {
     }
 }
 
-const forgetPassword = async(req, res) => {
+// const forgetPassword = async(req, res) => {
+//     try {
+//         const {email, phone, newPassword, confirmNewPass} = req.body
+
+//         if(!email && !phone){
+//             return res.status(400).json({
+//                 status: 'ERROR',
+//                 message: 'Bat buoc nhap email hoac Sdt'
+//             })
+//         }
+//         if(newPassword !== confirmNewPass){
+//             return res.status(400).json({
+//                 status: 'ERROR',
+//                 message: 'Mat khau xac nhan khong trung voi mat khau moi'
+//             })
+//         }
+
+//         const response = await userService.forgetPassword(req.body)
+//         return res.status(200).json(response)
+//     } catch (err) {
+//         return res.status(500).json({
+//             message: 'Loi khi dat lai mat khau moi'
+//         })
+//     }
+// }
+
+
+const forgetPassword = async (req, res) => {
     try {
-        const {email, phone, newPassword, confirmNewPass} = req.body
+        const { identifier, newPassword, confirmNewPass } = req.body;
 
-        if(!email && !phone){
+        // Kiểm tra đầu vào
+        if (!identified) {
             return res.status(400).json({
                 status: 'ERROR',
-                message: 'Bat buoc nhap email hoac Sdt'
-            })
-        }
-        if(newPassword !== confirmNewPass){
-            return res.status(400).json({
-                status: 'ERROR',
-                message: 'Mat khau xac nhan khong trung voi mat khau moi'
-            })
+                message: 'Bạn phải nhập email hoặc số điện thoại.',
+            });
         }
 
-        const response = await userService.forgetPassword(req.body)
-        return res.status(200).json(response)
+        if (newPassword !== confirmNewPass) {
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Mật khẩu xác nhận không khớp với mật khẩu mới.',
+            });
+        }
+
+        // Gọi service để xử lý logic đặt lại mật khẩu
+        const response = await userService.forgetPassword({ identifier, newPassword });
+
+        // Thành công
+        return res.status(200).json(response);
     } catch (err) {
+        // Xử lý lỗi
         return res.status(500).json({
-            message: 'Loi khi dat lai mat khau moi'
-        })
+            status: 'ERROR',
+            message: err.message || 'Lỗi khi đặt lại mật khẩu.',
+        });
     }
-}
+};
+
 
 const deleteUser = async(req, res) =>{
     try {
