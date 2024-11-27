@@ -169,7 +169,7 @@ const editUser = async(req, res) =>{
             message: err
         })
     }
-}
+} 
 
 const changePassword = async(req, res) => {
     try{

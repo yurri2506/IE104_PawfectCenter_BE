@@ -15,7 +15,7 @@ const genneralRefreshToken = async(payload) =>{
         payload
     , process.env.REFRESH_TOKEN, {expiresIn: '365d'})
     return refreshToken
-}
+} 
 
 const refreshTokenService = async(refresh_token) =>{
 
