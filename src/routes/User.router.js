@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const userController = require("../controllers/User.controller")
 const otpController = require("../controllers/Otp.controller")
+const notificationController = require("../controllers/Notification.controller")
 const {authUserMiddleWare} = require('../middleware/AuthMiddleWare')
 
 router.post('/send-otp' ,  otpController.sendOtp)   
@@ -19,4 +20,5 @@ router.post('/add-address/:id', authUserMiddleWare, userController.addAddress)
 router.post('/:id/set-address-default/:address_id', authUserMiddleWare, userController.setAddressDefault)
 router.post('/sign-out' ,  userController.signOut)  
 router.post('/refresh-token' ,  userController.refreshToken) 
+router.get('/notification/:id', authUserMiddleWare, notificationController.getAllNotify)
 module.exports = router

@@ -1,5 +1,7 @@
 const User = require('../models/User.model')
 const Cart = require('../models/Cart.model')
+const Favor = require('../models/Favor.model')
+
 const bcrypt = require('bcrypt')
 const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
 const { messaging } = require('firebase-admin')
@@ -28,11 +30,17 @@ const signUpPhone = (newUser)=>{
                     user_address: []
                 })
             
+
                 console.log(createUser)
                 if(createUser){
                     await Cart.create({
                     user_id: createUser._id
-                })
+                    })
+
+                    await Favor.create({
+                        user_id: createUser._id    
+                    })
+
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
@@ -467,53 +475,67 @@ const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_CALLBACK_URL
 );
+const axios = require('axios');
 
-const signInGoogle = (googleToken) => {
-    return new Promise( async( resolve, reject) =>{
+const signInGoogle = (googleAccessToken) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            const ticket = await oauth2Client.verifyIdToken({
-                idToken: googleToken,
-                audience: process.env.GOOGLE_CLIENT_ID,
+            const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: {
+                    Authorization: `Bearer ${googleAccessToken}`,
+                },
             });
-        
-            const payload = ticket.getPayload();
-            const { email, name, sub: googleId } = payload;
-        
+
+            const { email, name, sub: googleId } = userInfoResponse.data;
+
             let user = await User.findOne({ user_email: email });
-        
+
             const hashedPassword = await bcrypt.hash("", 10);
 
             if (!user) {
-                // Nếu chưa có, tạo mới người dùng
                 user = await User.create({
                     user_email: email,
                     user_name: name,
                     google_id: googleId,
                     user_address: [],
-                    user_password: hashedPassword
+                    user_password: hashedPassword,
                 });
             }
 
+            if(user){
+                await Cart.create({
+                user_id: user._id
+                })
+
+                await Favor.create({
+                    user_id: user._id    
+                })
+            }
+
             const access_token = await genneralAccessToken({
-                id: user.id
-            })
+                id: user.id,
+            });
             const refresh_token = await genneralRefreshToken({
-                id: user.id
-            })
+                id: user.id,
+            });
 
             return resolve({
                 status: 'OK',
-                message: 'Dang nhap thanh cong',
+                message: 'Đăng nhập thành công',
                 ACCESS_TOKEN: access_token,
-                REFRESH_TOKEN: refresh_token
-            })
+                REFRESH_TOKEN: refresh_token,
+            });
 
         } catch (error) {
-            return reject(error)
+            return reject({
+                status: 'FAIL',
+                message: 'Đăng nhập thất bại',
+                error: error.message,
+            });
         }
-    })
-    
+    });
 };
+
 module.exports = {
     signUpPhone,
     signUpEmail,
