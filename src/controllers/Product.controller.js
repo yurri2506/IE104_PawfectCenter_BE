@@ -192,12 +192,13 @@ const getDetailsProduct = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
   try {
-    const { limit, page, sort, search, product_category, product_brand, product_rate, pet_age } = req.query;
+    const { limit, page, sort, search, product_category, product_brand, product_rate, pet_age, product_famous } = req.query;
 
     // Chuẩn bị các tham số lọc riêng lẻ
     const filters = {
       product_category,
       product_brand,
+      product_famous,
       product_rate: product_rate ? Number(product_rate) : undefined,
       pet_age: pet_age ? Number(pet_age) : undefined,
     };
@@ -207,7 +208,7 @@ const getAllProduct = async (req, res) => {
       Number(limit) || null,
       Number(page) || 0,
       sort || null,
-      filters,
+      filters || null,
       search || null
     );
 

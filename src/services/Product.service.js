@@ -250,6 +250,11 @@ const getAllProduct = (limit = 0, page = 0, sort = "", filters = {}, search = ""
         query.product_title = { $regex: search, $options: "i" };
       }
 
+      // Lọc theo sản phẩm nổi bật
+      if (filters.product_famous == "true"){
+        query.product_famous = true;
+      }
+
       // Lọc theo danh mục (product_category)
       if (filters.product_category) {
         query.product_category = filters.product_category;
