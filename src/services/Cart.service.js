@@ -93,9 +93,8 @@ const updateCart = async (cartId, data) => {
 const getAllProductByUserId = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await Cart.findOne({
-        user_id: id,
-      });
+      const user = await Cart.findOne({ user_id: id })
+      .populate('products.product_id', 'product_images product_title product_price product_percent_discount')
       if (user === null) {
         resolve({
           status: "ERR",

@@ -53,14 +53,14 @@ const updateCart = async (req, res) => {
 
 const getAllProductByUserId = async (req, res) => {
   try {
-    const userId = req.params.id;
-    if (!userId) {
+    const id = req.params.id;
+    if (!id) {
       return res.status(200).json({
         status: "ERR",
         message: "The userId is required",
       });
     }
-    const response = await CartService.getDetailsCart(userId);
+    const response = await CartService.getAllProductByUserId(id);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
