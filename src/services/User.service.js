@@ -362,9 +362,10 @@ const forgetPassword = (data) => {
 
             let query = {};
             if (/^\S+@\S+\.\S+$/.test(identifier)) {
-                query = { user_email: identifier }; 
+                query = { user_email: identifier };
             } else if (/^\d{10,15}$/.test(identifier)) {
-                query = { user_phone: identifier }; 
+                query = { user_phone: identifier };
+            } else {
                 return reject({
                     status: 'ERROR',
                     message: 'Định dạng không hợp lệ. Vui lòng nhập email hoặc số điện thoại.',

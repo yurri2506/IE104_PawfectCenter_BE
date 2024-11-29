@@ -237,7 +237,7 @@ const forgetPassword = async (req, res) => {
         const { identifier, newPassword, confirmNewPass } = req.body;
 
         // Kiểm tra đầu vào
-        if (!identified) {
+        if (!identifier) {
             return res.status(400).json({
                 status: 'ERROR',
                 message: 'Bạn phải nhập email hoặc số điện thoại.',
