@@ -307,51 +307,99 @@ const changePassword = (data, userId) =>{
     })
 }
 
-const forgetPassword = (data) =>{
-    return new Promise(async(resolve, reject) =>{
-        const{email, phone, newPassword, confirmNewPass} = data
-        try {
-            let user
-            if(email && !phone){
-                user = await User.findOne({
-                    user_email: email
-                })
-            }
-            if(!email && phone){
-                user = await User.findOne({
-                    user_phone: phone
-                })
-            }
+// const forgetPassword = (data) =>{
+//     return new Promise(async(resolve, reject) =>{
+//         const{email, phone, newPassword, confirmNewPass} = data
+//         try {
+//             let user
+//             if(email && !phone){
+//                 user = await User.findOne({
+//                     user_email: email
+//                 })
+//             }
+//             if(!email && phone){
+//                 user = await User.findOne({
+//                     user_phone: phone
+//                 })
+//             }
 
-            if(!user){
+//             if(!user){
+//                 return reject({
+//                     status: 'ERROR',
+//                     message: 'Tai khoan nay chua duoc dang ky'
+//                 })
+//             }
+
+//             const hash = bcrypt.hashSync(newPassword, 10)
+//             const editUser = await User.findByIdAndUpdate(
+//                 user._id,
+//                 {
+//                     user_password: hash
+//                 },
+//                 {new: true}
+//             )
+
+//             return resolve({
+//                 status: 'Successfully',
+//                 message: 'Dat lai mat khau thanh cong',
+//                 data: editUser
+//             })
+//         } catch (err) {
+//             return reject({
+//                 status: 'ERROR',
+//                 message: err.message
+//             })
+//         }
+//     })
+// }
+
+
+const forgetPassword = (data) => {
+    const { identifier, newPassword } = data;
+
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let query = {};
+            if (/^\S+@\S+\.\S+$/.test(identifier)) {
+                query = { user_email: identifier };
+            } else if (/^\d{10,15}$/.test(identifier)) {
+                query = { user_phone: identifier };
+            } else {
                 return reject({
                     status: 'ERROR',
-                    message: 'Tai khoan nay chua duoc dang ky'
-                })
+                    message: 'Định dạng không hợp lệ. Vui lòng nhập email hoặc số điện thoại.',
+                });
             }
 
-            const hash = bcrypt.hashSync(newPassword, 10)
-            const editUser = await User.findByIdAndUpdate(
+            const user = await User.findOne(query);
+            if (!user) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tài khoản này chưa được đăng ký.',
+                });
+            }
+
+            const hash = bcrypt.hashSync(newPassword, 10);
+            const updatedUser = await User.findByIdAndUpdate(
                 user._id,
-                {
-                    user_password: hash
-                },
-                {new: true}
-            )
+                { user_password: hash },
+                { new: true }
+            );
 
             return resolve({
-                status: 'Successfully',
-                message: 'Dat lai mat khau thanh cong',
-                data: editUser
-            })
+                status: 'SUCCESS',
+                message: 'Đặt lại mật khẩu thành công.',
+                data: updatedUser,
+            });
         } catch (err) {
             return reject({
                 status: 'ERROR',
-                message: err.message
-            })
+                message: err.message || 'Lỗi khi đặt lại mật khẩu.',
+            });
         }
-    })
-}
+    });
+};
 
 const deleteUser = (userId) =>{
     return new Promise( async(resolve, reject) =>{
