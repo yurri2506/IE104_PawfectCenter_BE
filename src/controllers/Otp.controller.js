@@ -9,9 +9,9 @@ exports.sendOtp = async (req, res) => {
 
   try {
     await emailService.sendOtp(email);
-    res.status(200).json({ message: 'OTP đã được gửi tới email của bạn!' });
+    res.status(200).json({status: 'OK', message: 'OTP đã được gửi tới email của bạn!' });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi gửi OTP', error });
+    res.status(500).json({status: 'ERROR', message: 'Lỗi khi gửi OTP', error });
   }
 };
 
@@ -19,13 +19,13 @@ exports.sendOtp = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) {
-    return res.status(400).json({ message: 'Email và mã OTP là bắt buộc' });
+    return res.status(400).json({status: 'ERROR', message: 'Email và mã OTP là bắt buộc' });
   }
 
   const isVerified = await emailService.verifyOtp(email, otp);
   if (isVerified) {
-    res.status(200).json({ message: 'Xác thực OTP thành công!' });
+    res.status(200).json({status: 'OK', message: 'Xác thực OTP thành công!' });
   } else {
-    res.status(400).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
+    res.status(400).json({status: 'ERROR', message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
   }
 };

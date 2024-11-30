@@ -7,16 +7,20 @@ const JwtService = require('../services/Jwt.service')
 const signUpPhone = async(req, res)=>{
     try{
         console.log(req.body)
+        const {phone, name, password, confirmPassword} = req.body
+        // const {error} = userSignUpPhone.validate(req.body, {abortEarly: false})
 
-        const {error} = userSignUpPhone.validate(req.body, {abortEarly: false})
-
-        if(error){
+        if(!phone || !name || !password || !confirmPassword){
             return res.status(400).json({
                 status: 'ERROR',
-                errors: error.details.reduce((acc, detail) =>{
-                    acc[detail.context.key] = detail.message
-                    return acc
-                }, {})
+                message: 'Thong tin la bat buoc'
+            })
+        }
+
+        if(password !== confirmPassword){
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Mat khau khong khop'
             })
         }
 
@@ -123,7 +127,7 @@ const signIn = async(req, res) =>{
 
     }catch(err){
         return res.status(404).json({
-            message: err
+            err
         })
     }
 }
@@ -201,31 +205,66 @@ const changePassword = async(req, res) => {
     }
 }
 
-const forgetPassword = async(req, res) => {
+// const forgetPassword = async(req, res) => {
+//     try {
+//         const {email, phone, newPassword, confirmNewPass} = req.body
+
+//         if(!email && !phone){
+//             return res.status(400).json({
+//                 status: 'ERROR',
+//                 message: 'Bat buoc nhap email hoac Sdt'
+//             })
+//         }
+//         if(newPassword !== confirmNewPass){
+//             return res.status(400).json({
+//                 status: 'ERROR',
+//                 message: 'Mat khau xac nhan khong trung voi mat khau moi'
+//             })
+//         }
+
+//         const response = await userService.forgetPassword(req.body)
+//         return res.status(200).json(response)
+//     } catch (err) {
+//         return res.status(500).json({
+//             message: 'Loi khi dat lai mat khau moi'
+//         })
+//     }
+// }
+
+
+const forgetPassword = async (req, res) => {
     try {
-        const {email, phone, newPassword, confirmNewPass} = req.body
+        const { identifier, newPassword, confirmNewPass } = req.body;
 
-        if(!email && !phone){
+        // Kiểm tra đầu vào
+        if (!identifier) {
             return res.status(400).json({
                 status: 'ERROR',
-                message: 'Bat buoc nhap email hoac Sdt'
-            })
-        }
-        if(newPassword !== confirmNewPass){
-            return res.status(400).json({
-                status: 'ERROR',
-                message: 'Mat khau xac nhan khong trung voi mat khau moi'
-            })
+                message: 'Bạn phải nhập email hoặc số điện thoại.',
+            });
         }
 
-        const response = await userService.forgetPassword(req.body)
-        return res.status(200).json(response)
+        if (newPassword !== confirmNewPass) {
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Mật khẩu xác nhận không khớp với mật khẩu mới.',
+            });
+        }
+
+        // Gọi service để xử lý logic đặt lại mật khẩu
+        const response = await userService.forgetPassword({ identifier, newPassword });
+
+        // Thành công
+        return res.status(200).json(response);
     } catch (err) {
+        // Xử lý lỗi
         return res.status(500).json({
-            message: 'Loi khi dat lai mat khau moi'
-        })
+            status: 'ERROR',
+            message: err.message || 'Lỗi khi đặt lại mật khẩu.',
+        });
     }
-}
+};
+
 
 const deleteUser = async(req, res) =>{
     try {
@@ -331,6 +370,28 @@ const refreshToken = async (req, res) => {
     }
 }
 
+const signInGoogle = async(req, res)=>{
+    try {
+        const {googleToken} = req.body
+
+        if(!googleToken){
+            return res.status(400).json({
+                status: 'ERROR',
+                message: 'Google token la bat buoc'
+            })
+        }
+
+        const response = await userService.signInGoogle(googleToken)
+
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(400).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     signUpPhone,
     signUpEmail,
@@ -343,5 +404,6 @@ module.exports = {
     addAddress,
     signOut,
     setAddressDefault,
-    refreshToken
+    refreshToken,
+    signInGoogle
 }

@@ -49,10 +49,11 @@ const authUserMiddleWare = (req, res, next)=>{
     }
 
     const userId = req.params.id
+    console.log(userId)
     console.log(process.env.ACCESS_TOKEN) 
     jwt.verify(token, process.env.ACCESS_TOKEN , function (err, user){
         if (err) {
-            return res.status(404).json({
+            return res.status(400).json({
                 message: 'The authemtication',
                 status: 'ERROR'
             })

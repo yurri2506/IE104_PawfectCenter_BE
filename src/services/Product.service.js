@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
 const ObjectId = mongoose.Types.ObjectId;
+const notificationService = require("../services/Notification.service")
+const Notification = require("../models/Notification.model")
 // Tạo sản phẩm
 const createProduct = (newProduct) => {
   return new Promise(async (resolve, reject) => {
@@ -67,7 +69,16 @@ const createProduct = (newProduct) => {
 
       // Tạo sản phẩm mới trong database
       const newProductInstance = await Product.create(newProductData);
+      if (newProductInstance && newProductInstance.product_display) {
 
+        await Notification.create({
+          user_id: null,
+          product_id: newProductInstance._id,
+          notify_type: 'Sản phẩm',
+          notify_title: 'Sản phẩm mới đã có mặt',
+          notify_desc:`Sản phẩm ${newProductInstance.product_title} đã có sắn, mua hang ngay nào`
+        })
+      }
       if (newProductInstance) {
         return resolve({
           status: "OK",

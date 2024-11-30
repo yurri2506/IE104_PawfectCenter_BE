@@ -38,7 +38,7 @@ const getAllNotify = (userId) => {
                     { user_id: null }    
                 ]
             }).sort({ createdAt: -1 }); 
-    
+            console.log(notifications)
             return resolve({
                 status: 'OK',
                 data: notifications,

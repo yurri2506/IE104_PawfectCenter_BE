@@ -1,8 +1,11 @@
 const User = require('../models/User.model')
 const Cart = require('../models/Cart.model')
+const Favor = require('../models/Favor.model')
+
 const bcrypt = require('bcrypt')
 const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
 const { messaging } = require('firebase-admin')
+const { google } = require('googleapis');
 
 const signUpPhone = (newUser)=>{
     return new Promise( async(resolve, reject)=>{
@@ -27,11 +30,17 @@ const signUpPhone = (newUser)=>{
                     user_address: []
                 })
             
+
                 console.log(createUser)
                 if(createUser){
                     await Cart.create({
                     user_id: createUser._id
-                })
+                    })
+
+                    await Favor.create({
+                        user_id: createUser._id    
+                    })
+
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
@@ -162,7 +171,7 @@ const signIn = (signInUser) => {
 
             if (!checkUser || checkUser.is_delete) {
                 return reject({
-                    status: 'ERROR',
+                    statusCode: 400,
                     field: 'email_or_phone',
                     message: 'Tài khoản chưa được đăng ký'
                 });
@@ -171,7 +180,7 @@ const signIn = (signInUser) => {
             const isPasswordCorrect = await bcrypt.compare(password, checkUser.user_password);
             if (!isPasswordCorrect) {
                 return reject({
-                    status: 'ERROR',
+                    statusCode: 400,
                     field: 'isTruePass',
                     message: 'Mật khẩu không chính xác'
                 });
@@ -192,7 +201,7 @@ const signIn = (signInUser) => {
             });
         } catch (err) {
             reject({
-                status: 'ERROR',
+                statusCode: 500,
                 message: 'Lỗi xảy ra khi đăng nhập',
                 error: err.message  // chỉ gửi chi tiết lỗi khi có lỗi hệ thống
             });
@@ -298,51 +307,99 @@ const changePassword = (data, userId) =>{
     })
 }
 
-const forgetPassword = (data) =>{
-    return new Promise(async(resolve, reject) =>{
-        const{email, phone, newPassword, confirmNewPass} = data
-        try {
-            let user
-            if(email && !phone){
-                user = await User.findOne({
-                    user_email: email
-                })
-            }
-            if(!email && phone){
-                user = await User.findOne({
-                    user_phone: phone
-                })
-            }
+// const forgetPassword = (data) =>{
+//     return new Promise(async(resolve, reject) =>{
+//         const{email, phone, newPassword, confirmNewPass} = data
+//         try {
+//             let user
+//             if(email && !phone){
+//                 user = await User.findOne({
+//                     user_email: email
+//                 })
+//             }
+//             if(!email && phone){
+//                 user = await User.findOne({
+//                     user_phone: phone
+//                 })
+//             }
 
-            if(!user){
+//             if(!user){
+//                 return reject({
+//                     status: 'ERROR',
+//                     message: 'Tai khoan nay chua duoc dang ky'
+//                 })
+//             }
+
+//             const hash = bcrypt.hashSync(newPassword, 10)
+//             const editUser = await User.findByIdAndUpdate(
+//                 user._id,
+//                 {
+//                     user_password: hash
+//                 },
+//                 {new: true}
+//             )
+
+//             return resolve({
+//                 status: 'Successfully',
+//                 message: 'Dat lai mat khau thanh cong',
+//                 data: editUser
+//             })
+//         } catch (err) {
+//             return reject({
+//                 status: 'ERROR',
+//                 message: err.message
+//             })
+//         }
+//     })
+// }
+
+
+const forgetPassword = (data) => {
+    const { identifier, newPassword } = data;
+
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let query = {};
+            if (/^\S+@\S+\.\S+$/.test(identifier)) {
+                query = { user_email: identifier };
+            } else if (/^\d{10,15}$/.test(identifier)) {
+                query = { user_phone: identifier };
+            } else {
                 return reject({
                     status: 'ERROR',
-                    message: 'Tai khoan nay chua duoc dang ky'
-                })
+                    message: 'Định dạng không hợp lệ. Vui lòng nhập email hoặc số điện thoại.',
+                });
             }
 
-            const hash = bcrypt.hashSync(newPassword, 10)
-            const editUser = await User.findByIdAndUpdate(
+            const user = await User.findOne(query);
+            if (!user) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tài khoản này chưa được đăng ký.',
+                });
+            }
+
+            const hash = bcrypt.hashSync(newPassword, 10);
+            const updatedUser = await User.findByIdAndUpdate(
                 user._id,
-                {
-                    user_password: hash
-                },
-                {new: true}
-            )
+                { user_password: hash },
+                { new: true }
+            );
 
             return resolve({
-                status: 'Successfully',
-                message: 'Dat lai mat khau thanh cong',
-                data: editUser
-            })
+                status: 'SUCCESS',
+                message: 'Đặt lại mật khẩu thành công.',
+                data: updatedUser,
+            });
         } catch (err) {
             return reject({
                 status: 'ERROR',
-                message: err.message
-            })
+                message: err.message || 'Lỗi khi đặt lại mật khẩu.',
+            });
         }
-    })
-}
+    });
+};
 
 const deleteUser = (userId) =>{
     return new Promise( async(resolve, reject) =>{
@@ -460,6 +517,73 @@ const getAllUser = () => {
         }
     })
 }
+
+const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_CALLBACK_URL
+);
+const axios = require('axios');
+
+const signInGoogle = (googleAccessToken) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: {
+                    Authorization: `Bearer ${googleAccessToken}`,
+                },
+            });
+
+            const { email, name, sub: googleId } = userInfoResponse.data;
+
+            let user = await User.findOne({ user_email: email });
+
+            const hashedPassword = await bcrypt.hash("", 10);
+
+            if (!user) {
+                user = await User.create({
+                    user_email: email,
+                    user_name: name,
+                    google_id: googleId,
+                    user_address: [],
+                    user_password: hashedPassword,
+                });
+            }
+
+            if(user){
+                await Cart.create({
+                user_id: user._id
+                })
+
+                await Favor.create({
+                    user_id: user._id    
+                })
+            }
+
+            const access_token = await genneralAccessToken({
+                id: user.id,
+            });
+            const refresh_token = await genneralRefreshToken({
+                id: user.id,
+            });
+
+            return resolve({
+                status: 'OK',
+                message: 'Đăng nhập thành công',
+                ACCESS_TOKEN: access_token,
+                REFRESH_TOKEN: refresh_token,
+            });
+
+        } catch (error) {
+            return reject({
+                status: 'FAIL',
+                message: 'Đăng nhập thất bại',
+                error: error.message,
+            });
+        }
+    });
+};
+
 module.exports = {
     signUpPhone,
     signUpEmail,
@@ -471,5 +595,6 @@ module.exports = {
     deleteUser,
     addAddress,
     setAddressDefault,
-    getAllUser
+    getAllUser,
+    signInGoogle
 }
