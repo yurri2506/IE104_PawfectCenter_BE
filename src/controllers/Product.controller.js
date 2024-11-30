@@ -192,13 +192,17 @@ const getDetailsProduct = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
   try {
-    const { limit, page, sort, search, product_category, product_brand, product_rate, pet_age, product_famous } = req.query;
+    const { limit, page, sort, search, priceMin, priceMax, product_brand, product_rate, pet_age, category_level_1, category_level_2,category_level_3, product_famous } = req.query;
 
     // Chuẩn bị các tham số lọc riêng lẻ
     const filters = {
-      product_category,
       product_brand,
       product_famous,
+      category_level_1: category_level_1? String(category_level_1): null,
+      category_level_2: category_level_2? String(category_level_2): null,
+      category_level_3: category_level_3? String(category_level_3): null,
+      priceMin: priceMin ? Number(priceMin) : undefined,
+      priceMax: priceMax ? Number(priceMax) : undefined,
       product_rate: product_rate ? Number(product_rate) : undefined,
       pet_age: pet_age ? Number(pet_age) : undefined,
     };
@@ -219,8 +223,6 @@ const getAllProduct = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = {
   createProduct,
