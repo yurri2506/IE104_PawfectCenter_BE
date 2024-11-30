@@ -241,7 +241,13 @@ const getDetailsProduct = (id) => {
   });
 };
 
-const getAllProduct = async (limit = 0, page = 0, sort = "", filters = {}, search = "") => {
+const getAllProduct = async (
+  limit = 0,
+  page = 0,
+  sort = "",
+  filters = {},
+  search = ""
+) => {
   try {
     const query = { is_delete: false, product_display: true }; // Lọc sản phẩm chưa bị xóa và đang hiển thị
 
@@ -255,75 +261,141 @@ const getAllProduct = async (limit = 0, page = 0, sort = "", filters = {}, searc
       query.product_famous = true;
     }
 
-    let categories = [];  // Mảng để chứa các category_id
+    let categories = new Set(); // Sử dụng Set để tránh trùng lặp
 
-    // Xử lý theo Mèo (category_level_1 = Mèo)
-    if (filters.category_level_1 && filters.category_level_1.includes("Mèo")) {
-      // Lọc danh mục cấp 2 của Mèo (category_level_2 bắt đầu với "10" và kết thúc với "2")
-      if (filters.category_level_2 && !filters.category_level_3) {
-        let level2Categories = await Category.find({
-          category_title: { $in: filters.category_level_2 },
-          category_level: "102", // Cấp 2 của Mèo
-        }).select("_id");
-
-        // Lọc danh mục cấp 3 thuộc cấp 2 của Mèo (category_level_3 bắt đầu với "102" và kết thúc với "3")
-        let level3Categories = await Category.find({
-          category_parent_id: { $in: level2Categories.map(cat => cat._id) },
-          category_level: "1023", // Cấp 3 của Mèo
-        }).select("_id");
-
-        categories = categories.concat(level3Categories.map(cat => cat._id));
-      }
-
-      // Lọc trực tiếp danh mục cấp 3 của Mèo
-      else if (filters.category_level_3) {
-        let level3Categories = await Category.find({
-          category_title: { $in: filters.category_level_3 },
-          category_level: "1023", // Cấp 3 của Mèo
-        }).select("_id");
-
-        categories = categories.concat(level3Categories.map(cat => cat._id));
-      }
+    // Kiểm tra và lấy ID cho category_level_1 (Chó/Mèo)
+    let categoryLevel1 = null;
+    if (filters.category_level_1 && filters.category_level_1.includes("Chó")) {
+      categoryLevel1 = "11"; // ID cho "Chó"
+    } else if (
+      filters.category_level_1 &&
+      filters.category_level_1.includes("Mèo")
+    ) {
+      categoryLevel1 = "10"; // ID cho "Mèo"
     }
 
-    // Xử lý theo Chó (category_level_1 = Chó)
-    else if (filters.category_level_1 && filters.category_level_1.includes("Chó")) {
-      // Lọc danh mục cấp 2 của Chó (category_level_2 bắt đầu với "11" và kết thúc với "2")
-      if (filters.category_level_2 && !filters.category_level_3) {
+    if (categoryLevel1) {
+      // Nếu có category_level_1, truy vấn các danh mục cấp 2 và cấp 3
+      let level1Categories = await Category.find({
+        category_level: `${categoryLevel1}`, // Cấp 2 (ví dụ: "112" cho Chó)
+      }).select("_id");
+
+      // Lọc theo category_level_1 (Chó/Mèo) - Chỉ lấy các danh mục cấp 2 và cấp 3 liên kết với cấp 1
+      if (!filters.category_level_2 && !filters.category_level_3) {
+        // Tìm danh mục cấp 2 của Chó hoặc Mèo
+        let level2Categories = await Category.find({
+          category_level: `${categoryLevel1}2`, // Cấp 2 (ví dụ: "112" cho Chó)
+        }).select("_id");
+
+        if (level2Categories.length === 0) {
+          // Nếu không có danh mục cấp 2, có thể là do danh mục không đúng
+          console.log("No level 2 categories found.");
+        }
+
+        // Tìm danh mục cấp 3 của Chó hoặc Mèo
+        let level3Categories = await Category.find({
+          category_level: `${categoryLevel1}23`, // Cấp 3 (ví dụ: "1123" cho Chó)
+        }).select("_id");
+
+        if (level3Categories.length === 0) {
+          console.log("No level 3 categories found.");
+        }
+
+        // Kết hợp các category vào mảng
+        level3Categories.forEach((cat) => categories.add(cat._id.toString())); // Thêm vào Set
+      } else if (filters.category_level_2 && !filters.category_level_3) {
+        // Lọc theo category_level_2 nếu có
         let level2Categories = await Category.find({
           category_title: { $in: filters.category_level_2 },
-          category_level: "112", // Cấp 2 của Chó
-        }).select("_id");
+          category_level: `${categoryLevel1}2`, // Cấp 2
+        }).select("_id category_parent_id");
 
-        // Lọc danh mục cấp 3 thuộc cấp 2 của Chó (category_level_3 bắt đầu với "112" và kết thúc với "3")
+        let validLevel2Categories =
+          level2Categories.category_parent_id === level1Categories._id
+            ? level2Categories
+            : null;
+
         let level3Categories = await Category.find({
-          category_parent_id: { $in: level2Categories.map(cat => cat._id) },
-          category_level: "1123", // Cấp 3 của Chó
-        }).select("_id");
+          category_parent_id: {
+            $in: validLevel2Categories.map((cat) => cat._id),
+          },
+          category_level: `${categoryLevel1}23`, // Cấp 3
+        }).select("_id category_title category_parent_id");
+        validLevel2Categories.forEach((cat) =>
+          categories.add(cat._id.toString())
+        ); // Thêm vào Set
+        level3Categories.forEach((cat) => categories.add(cat._id.toString()));
+      } else if (filters.category_level_3) {
+        let level2Categories = await Category.find({
+          category_title: { $in: filters.category_level_2 },
+          category_level: `${categoryLevel1}2`, // Cấp 2
+        }).select("_id category_parent_id");
 
-        categories = categories.concat(level3Categories.map(cat => cat._id));
-      }
-
-      // Lọc trực tiếp danh mục cấp 3 của Chó
-      else if (filters.category_level_3) {
+        let validLevel2Categories =
+          level2Categories.category_parent_id === level1Categories._id
+            ? level2Categories
+            : null;
+        
         let level3Categories = await Category.find({
           category_title: { $in: filters.category_level_3 },
-          category_level: "1123", // Cấp 3 của Chó
-        }).select("_id");
+          category_level: `${categoryLevel1}23`, // Cấp 3
+        }).select("_id category_parent_id");
 
-        categories = categories.concat(level3Categories.map(cat => cat._id));
-      }
+        let validLevel3Categories =
+        level3Categories.category_parent_id === validLevel2Categories._id
+            ? level3Categories
+            : null;
+        validLevel3Categories.forEach((cat) =>
+          categories.add(cat._id.toString())
+        ); // Thêm vào Set
     }
-
-    // Kiểm tra nếu không có danh mục phù hợp
-    if (categories.length === 0) {
+    }
+    if (categories === 0) {
       return { status: "OK", message: "No products found", data: [], total: 0 };
     }
+    // Nếu không có category nào được tìm thấy và không truyền danh mục vào thì lấy toàn bộ sản phẩm
+    if (categories.size === 0 && !categoryLevel1) {
+      // Không lọc theo danh mục, lấy tất cả sản phẩm
+    } else {
+      // Nếu có danh mục, lọc sản phẩm theo category
+      query.product_category = { $in: Array.from(categories) }; // Chuyển Set thành mảng
+    }
 
-    // Đảm bảo có category_id trong query
-    query.product_category = { $in: categories };
+    // Lọc theo thương hiệu (product_brand)
+    if (filters.product_brand) {
+      query.product_brand = { $regex: filters.product_brand, $options: "i" };
+    }
 
-    console.log("Final query:", query);  // Kiểm tra lại query đã đúng chưa
+    // Lọc theo số sao đánh giá (product_rate)
+    if (filters.product_rate !== undefined) {
+      query.product_rate = { $gte: filters.product_rate }; // Lọc sản phẩm có số sao lớn hơn hoặc bằng
+    }
+
+    // Lọc theo số tuổi của thú cưng (pet_age)
+    if (filters.pet_age !== undefined) {
+      const petAge = Number(filters.pet_age);
+      if (petAge === -1) {
+        // Không lọc theo tuổi
+      } else if (petAge === 0) {
+        query["variants.pet_age"] = { $lt: 1 }; // Dưới 1 tuổi
+      } else if (petAge >= 1) {
+        query["variants.pet_age"] = { $gte: petAge }; // Trên 1 tuổi hoặc hơn
+      }
+    }
+
+    // Lọc theo giá (priceMin và priceMax)
+    if (filters.priceMin !== undefined && filters.priceMax !== undefined) {
+      query.product_price = {
+        $gte: filters.priceMin,
+        $lte: filters.priceMax,
+      }; // Lọc sản phẩm theo giá
+    } else if (filters.priceMin !== undefined) {
+      query.product_price = { $gte: filters.priceMin }; // Lọc sản phẩm có giá từ giá min trở lên
+    } else if (filters.priceMax !== undefined) {
+      query.product_price = { $lte: filters.priceMax }; // Lọc sản phẩm có giá dưới giá max
+    }
+
+    console.log("Final query:", query); // Kiểm tra lại query đã đúng chưa
 
     // Đếm tổng số sản phẩm phù hợp
     const totalProduct = await Product.countDocuments(query);
@@ -359,13 +431,14 @@ const getAllProduct = async (limit = 0, page = 0, sort = "", filters = {}, searc
       .sort(sortOptions)
       .populate("product_category", "category_name") // Populate tên danh mục từ ObjectId
       .populate("product_feedback"); // Populate đánh giá sản phẩm
-
+    
+      console.log("Number of products returned:", allProduct.length);
     return {
       status: "OK",
-      message: "Success",
+      message: "Lấy thành công sản phẩm khi getAll",
       data: allProduct,
       total: totalProduct,
-      pageCurrent: Number(page) + 1,
+      pageCurrent: Number(page)+1,
       totalPage: Math.ceil(totalProduct / limit),
     };
   } catch (e) {

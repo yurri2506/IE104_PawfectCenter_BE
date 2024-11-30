@@ -215,7 +215,6 @@ const getAllProduct = async (req, res) => {
       filters || null,
       search || null
     );
-
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
