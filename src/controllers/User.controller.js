@@ -162,7 +162,8 @@ const editUser = async(req, res) =>{
             })
         }
 
-        const response = await userService.editUser(req.body, userId)
+        const updateUser = {...req.body}
+        const response = await userService.editUser(updateUser, userId)
         return res.status(200).json(response)
     }catch(err){
         return res.status(500).json({
@@ -171,9 +172,39 @@ const editUser = async(req, res) =>{
     }
 } 
 
+const checkCurrentPass = async(req, res) => {
+    try{
+        const userId = req.params.id
+        const {password} = req.body
+        if(!userId){
+            return res.status(400).json({
+                status: 'ERR',
+                message: 'The userId is required'
+            })
+        }
+
+        if(!password){
+            return res.status(400).json({
+                status: 'ERR',
+                message: 'The password is required'
+            })
+        }
+
+        const response = await userService.checkCurrentPass(req.body, userId)
+
+        return res.status(200).json(response)
+        
+    }catch(err){
+        console.error(err)
+        return res.status(500).json({
+            message: err
+        })
+    }
+}
+
 const changePassword = async(req, res) => {
     try{
-        const {error} = changePasswordSchema.validate(req.body, {abortEarly: false})
+        const {newPassword, confirmNewPass} = req.body
         const userId = req.params.id
 
         if(!userId){
@@ -183,13 +214,17 @@ const changePassword = async(req, res) => {
             })
         }
 
-        if(error){
+        if(!newPassword || !confirmNewPass){
             return res.status(400).json({
-                status: 'ERROR',
-                errors: error.details.reduce((acc, detail) =>{
-                    acc[detail.context.key] = detail.message
-                    return acc
-                }, {})
+                status: 'ERR',
+                message: 'The newPassword, confirmNewPass is required'
+            })
+        }
+
+        if(newPassword !== confirmNewPass){
+            return res.status(400).json({
+                status: 'ERR',
+                message: 'Mat khau xac nhan khong khop'
             })
         }
 
@@ -295,9 +330,9 @@ const addAddress = async(req, res) =>{
             })
         }
 
-        const {home_address, province, district, commune , isDefault} = req.body
+        const {name, phone, home_address, province, district, commune , isDefault} = req.body
 
-        if(!home_address|| !province || !district || !commune){
+        if(!name || !phone || !home_address|| !province || !district || !commune){
             return res.status(400).json({
                 status: 'ERROR',
                 message: 'Cac truong dia chi la bat buoc'
@@ -313,6 +348,61 @@ const addAddress = async(req, res) =>{
         })
     }
 }
+
+const updateAddress = async (req, res) => {
+    try {
+      const userId = req.params.userId; // ID người dùng
+      const addressId = req.params.addressId; // ID địa chỉ cần cập nhật
+  
+      if (!userId || !addressId) {
+        return res.status(400).json({
+          status: 'ERROR',
+          message: 'ID người dùng và ID địa chỉ là bắt buộc',
+        });
+      }
+  
+      const { name, phone, home_address, province, district, commune, isDefault } = req.body;
+  
+      // Gọi service để cập nhật địa chỉ
+      const response = await userService.updateAddress(userId, addressId, req.body);
+  
+      return res.status(200).json(response);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        status: 'ERROR',
+        message: 'Lỗi khi cập nhật địa chỉ',
+      });
+    }
+  };
+
+  const deleteAddress = async (req, res) => {
+    try {
+      const userId = req.params.userId; // ID người dùng
+      const addressId = req.params.addressId; // ID địa chỉ cần cập nhật
+  
+      if (!userId || !addressId) {
+        return res.status(400).json({
+          status: 'ERROR',
+          message: 'ID người dùng và ID địa chỉ là bắt buộc',
+        });
+      }
+  
+      const { name, phone, home_address, province, district, commune, isDefault } = req.body;
+  
+      // Gọi service để xoa dia chi
+      const response = await userService.deleteAddress(userId, addressId);
+  
+      return res.status(200).json(response);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        status: 'ERROR',
+        message: 'Lỗi khi xoa địa chỉ',
+      });
+    }
+  };
+  
 
 const setAddressDefault = async(req, res)=>{
     try {
@@ -398,10 +488,13 @@ module.exports = {
     signIn,
     getDetailUser,
     editUser,
+    checkCurrentPass,
     changePassword,
     forgetPassword,
     deleteUser,
     addAddress,
+    updateAddress,
+    deleteAddress,
     signOut,
     setAddressDefault,
     refreshToken,
