@@ -86,14 +86,14 @@ const updateStore = async (req, res) => {
 
 const getDetail = async (req, res) => {
   try {
-    const storeId = req.params.id;
-    if (!storeId) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "The storeId in Store is required",
-      });
-    }
-    const response = await StoreService.getDetail(storeId);
+    //const storeId = req.params.id;
+    // if (!storeId) {
+    //   return res.status(200).json({
+    //     status: "ERR",
+    //     message: "The storeId in Store is required",
+    //   });
+    // }
+    const response = await StoreService.getDetail();
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({

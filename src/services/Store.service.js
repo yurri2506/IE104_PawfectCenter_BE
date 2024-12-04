@@ -68,18 +68,18 @@ const updateStore = async (id, data) => {
   }
 };
 
-const getDetail = (storeId) => {
+const getDetail = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const store = await Store.find({ '_id': storeId });
-      
-      if (!store || store.length === 0) {
+      const stores = await Store.find();
+      const store = stores[0]
+      if (!store ) {
         return resolve({
           status: "ERR",
           message: "Không có thông tin nào cho cửa hàng này",
         });
       }
-
+      console.log('store',store)
       resolve({
         status: "OK",
         message: "Lấy thông tin cửa hàng thành công",

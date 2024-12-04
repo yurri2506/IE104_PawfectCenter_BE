@@ -3,24 +3,24 @@ const Cart = require('../models/Cart.model')
 const Favor = require('../models/Favor.model')
 
 const bcrypt = require('bcrypt')
-const {genneralAccessToken, genneralRefreshToken}= require('./Jwt.service')
+const { genneralAccessToken, genneralRefreshToken } = require('./Jwt.service')
 const { messaging } = require('firebase-admin')
 const { google } = require('googleapis');
 
-const signUpPhone = (newUser)=>{
-    return new Promise( async(resolve, reject)=>{
-        const{phone, name, password, confirmPassword} = newUser
-        try{
+const signUpPhone = (newUser) => {
+    return new Promise(async (resolve, reject) => {
+        const { phone, name, password, confirmPassword } = newUser
+        try {
             const checkUser = await User.findOne({
                 user_phone: phone
             })
 
-            if(checkUser !== null){
+            if (checkUser !== null) {
                 reject({
                     status: 'ERROR',
                     message: 'So dien thoai da ton tai'
                 })
-            }else{
+            } else {
                 const hash = await bcrypt.hash(password, 10);
                 const createUser = await User.create({
                     user_phone: phone,
@@ -29,16 +29,16 @@ const signUpPhone = (newUser)=>{
                     user_avt_img: "",
                     user_address: []
                 })
-            
+
 
                 console.log(createUser)
-                if(createUser){
+                if (createUser) {
                     await Cart.create({
-                    user_id: createUser._id
+                        user_id: createUser._id
                     })
 
                     await Favor.create({
-                        user_id: createUser._id    
+                        user_id: createUser._id
                     })
 
                     resolve({
@@ -48,8 +48,8 @@ const signUpPhone = (newUser)=>{
                     })
                 }
             }
-            
-        }catch(err){
+
+        } catch (err) {
             reject({
                 status: 'ERROR',
                 message: 'Loi khi dang ky nguoi dung',
@@ -59,20 +59,20 @@ const signUpPhone = (newUser)=>{
     })
 }
 
-const signUpEmail = (newUser)=>{
-    return new Promise( async(resolve, reject)=>{
-        const{email, name, password, confirmPassword} = newUser
-        try{
+const signUpEmail = (newUser) => {
+    return new Promise(async (resolve, reject) => {
+        const { email, name, password, confirmPassword } = newUser
+        try {
             const checkUser = await User.findOne({
                 user_email: email
             })
 
-            if(checkUser !== null){
+            if (checkUser !== null) {
                 reject({
                     status: 'ERROR',
                     message: 'Email da ton tai'
                 })
-            }else{
+            } else {
                 const hash = await bcrypt.hash(password, 10);
                 const createUser = await User.create({
                     user_email: email,
@@ -80,16 +80,16 @@ const signUpEmail = (newUser)=>{
                     user_password: hash
                 })
                 console.log(createUser)
-                if(createUser){
+                if (createUser) {
                     resolve({
                         status: 'OK',
                         message: 'Dang ky thanh cong',
                         data: createUser
-                })
+                    })
                 }
             }
-            
-        }catch(err){
+
+        } catch (err) {
             reject({
                 status: 'ERROR',
                 message: 'Loi khi dang ky nguoi dung',
@@ -209,74 +209,137 @@ const signIn = (signInUser) => {
     });
 };
 
-const getDetailUser = (userId)=>{
-    return new Promise( async(resolve, reject)=>{
+const getDetailUser = (userId) => {
+    return new Promise(async (resolve, reject) => {
         const user = await User.findById(userId)
-        try{
-            if(user === null){
+        try {
+            if (user === null) {
                 return reject({
                     status: 'ERROR',
                     message: 'Nguoi dung khong ton tai'
                 })
-            }else{
+            } else {
                 return resolve({
                     status: 'OK',
                     message: 'Thanh cong',
                     data: user
                 })
             }
-        }catch(err){
-            reject(err)
-        }
-    })
-  }
-
-const editUser = (userEdited, userId) =>{
-    return new Promise (async(resolve, reject) =>{
-        const {name, email, phone, sex, birth} = userEdited
-        try{
-            const user = await User.findById(userId)
-            if(!user){
-                return reject({
-                    status: "ERROR",
-                    message: "Tai khoan khong ton tai"
-                })
-            }else{
-                const editUser = await User.findByIdAndUpdate(
-                    userId,
-                    {
-                        user_name: name,
-                        user_email: email,
-                        user_phone: phone,
-                        user_sex: sex,
-                        user_birth: birth
-                    },
-                    { new: true } // Tùy chọn trả về tài liệu sau khi cập nhật
-                );
-                return resolve({
-                    status: 'OK',
-                    message: 'Chinh sua thanh cong',
-                    data: editUser
-                })
-            }        
-        }catch(err){
+        } catch (err) {
             reject(err)
         }
     })
 }
 
-const changePassword = (data, userId) =>{
-    return new Promise (async(resolve, reject) => {
-        const {password, newPassword, confirmNewPass} = data
-        try{
+// const editUser = (userEdited, userId) => {
+//     return new Promise(async (resolve, reject) => {
+//         //const { name, full_name, email, phone, sex, birth } = userEdited
+//         try {
+//             const user = await User.findById(userId)
+//             if (!user) {
+//                 return reject({
+//                     status: "ERROR",
+//                     message: "Tai khoan khong ton tai"
+//                 })
+//             } else {
+//                 // const editUser = await User.findByIdAndUpdate(
+//                 //     userId,
+//                 //     {
+//                 //         user_name: name !== undefined ? name : user.user_name,
+//                 //         full_name: full_name !== undefined ? full_name : user.full_name,
+//                 //         user_email: email !== undefined ? email : user.user_email,
+//                 //         user_phone: phone !== undefined ? phone : user.user_phone,
+//                 //         user_sex: sex !== undefined ? sex : user.user_sex,
+//                 //         user_birth: birth !== undefined ? birth : user.user_birth,
+//                 //     },  
+//                 //     { new: true } // Tùy chọn trả về tài liệu sau khi cập nhật
+//                 // );
+//                 const editUser = await User.findByIdAndUpdate(
+//                     userId, userEdited,
+//                     { new: true, runValidators: true } // Tùy chọn trả về tài liệu sau khi cập nhật
+//                 );
+//                 return resolve({
+//                     status: 'OK',
+//                     message: 'Chinh sua thanh cong',
+//                     data: editUser
+//                 })
+//             }
+//         } catch (err) {
+//             reject(err)
+//         }
+//     })
+// }
+
+const editUser = (userEdited, userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Kiểm tra tài khoản có tồn tại hay không
+            const user = await User.findById(userId);
+            if (!user) {
+                return reject({
+                    status: "ERROR",
+                    message: "Tài khoản không tồn tại",
+                });
+            }
+
+            // Kiểm tra email hoặc số điện thoại đã tồn tại
+            const { user_email, user_phone } = userEdited;
+
+            if (user_email) {
+                const emailExists = await User.findOne({ user_email, _id: { $ne: userId } });
+                if (emailExists) {
+                    return reject({
+                        status: "ERROR",
+                        message: "Email đã được sử dụng bởi tài khoản khác",
+                    });
+                }
+            }
+
+            if (user_phone) {
+                const phoneExists = await User.findOne({ user_phone, _id: { $ne: userId } });
+                if (phoneExists) {
+                    return reject({
+                        status: "ERROR",
+                        message: "Số điện thoại đã được sử dụng bởi tài khoản khác",
+                    });
+                }
+            }
+
+            // Cập nhật tài khoản
+            const updatedUser = await User.findByIdAndUpdate(userId, userEdited, {
+                new: true,
+                runValidators: true, // Chạy validate theo schema
+            });
+
+            return resolve({
+                status: "OK",
+                message: "Chỉnh sửa thành công",
+                data: updatedUser,
+            });
+        } catch (err) {
+            return reject({
+                status: "ERROR",
+                message: "Đã xảy ra lỗi trong quá trình chỉnh sửa",
+                error: err.message,
+            });
+        }
+    });
+};
+
+
+
+const checkCurrentPass = (data, userId) => {
+    return new Promise(async (resolve, reject) => {
+        const { password } = data
+        try {
             const user = await User.findById(userId)
 
-            if(!user){
+            if (!user) {
                 return reject({
                     status: "ERROR",
                     message: "Tai khoan khong ton tai"
                 })
-            }else{
+            } else {
                 const isPasswordCorrect = await bcrypt.compare(password, user.user_password);
                 if (!isPasswordCorrect) {
                     return reject({
@@ -285,23 +348,55 @@ const changePassword = (data, userId) =>{
                     });
                 }
 
+                return resolve({
+                    status: 'OK',
+                    message: 'Mat khau la chinh xac',
+                })
+            }
+
+        } catch (err) {
+            reject(err)
+        }
+    })
+}
+
+const changePassword = (data, userId) => {
+    return new Promise(async (resolve, reject) => {
+        const { password, newPassword, confirmNewPass } = data
+        try {
+            const user = await User.findById(userId)
+
+            if (!user) {
+                return reject({
+                    status: "ERROR",
+                    message: "Tai khoan khong ton tai"
+                })
+            } else {
+                // const isPasswordCorrect = await bcrypt.compare(password, user.user_password);
+                // if (!isPasswordCorrect) {
+                //     return reject({
+                //         status: 'ERROR',
+                //         message: 'Mật khẩu không chính xác'
+                //     });
+                // }
+
                 const hash = bcrypt.hashSync(newPassword, 10)
                 const editUser = await
-                User.findByIdAndUpdate(
-                    userId,
-                    {
-                        user_password: hash
-                    },
-                    { new: true } // Tùy chọn trả về tài liệu sau khi cập nhật
-                );
+                    User.findByIdAndUpdate(
+                        userId,
+                        {
+                            user_password: hash
+                        },
+                        { new: true } // Tùy chọn trả về tài liệu sau khi cập nhật
+                    );
                 return resolve({
                     status: 'OK',
                     message: 'Doi mat khau thanh cong',
                     data: editUser
                 })
-            }        
+            }
 
-        }catch(err){
+        } catch (err) {
             reject(err)
         }
     })
@@ -401,11 +496,11 @@ const forgetPassword = (data) => {
     });
 };
 
-const deleteUser = (userId) =>{
-    return new Promise( async(resolve, reject) =>{
+const deleteUser = (userId) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findById(userId)
-            if(!user){
+            if (!user) {
                 return reject({
                     status: 'ERROR',
                     message: 'Tai khoan nay khong ton tai'
@@ -417,7 +512,7 @@ const deleteUser = (userId) =>{
                 {
                     is_delete: true
                 },
-                {new: true}
+                { new: true }
             )
 
             return resolve({
@@ -431,11 +526,11 @@ const deleteUser = (userId) =>{
     })
 }
 
-const addAddress = (userId, newAddress) =>{
-    return new Promise (async( resolve, reject) =>{
+const addAddress = (userId, newAddress) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findById(userId)
-            if(!user){
+            if (!user) {
                 return reject({
                     status: 'ERROR',
                     message: 'Tai khoan nay khong ton tai'
@@ -451,9 +546,9 @@ const addAddress = (userId, newAddress) =>{
             const userAddAdress = await User.findByIdAndUpdate(
                 userId,
                 {
-                    $push: { user_address: newAddress } 
+                    $push: { user_address: newAddress }
                 },
-                {new: true}
+                { new: true }
             )
 
             return resolve({
@@ -468,14 +563,112 @@ const addAddress = (userId, newAddress) =>{
     })
 }
 
-const setAddressDefault = (userId, addressId)=>{
-    return new Promise (async(resolve, reject) => {
+const updateAddress = (userId, addressId, addressData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Người dùng không tồn tại',
+                });
+            }
+
+            // Tìm địa chỉ cần cập nhật
+            const address = user.user_address.id(addressId);
+            if (!address) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Địa chỉ không tồn tại',
+                });
+            }
+
+            // Nếu `isDefault` là true, hủy mặc định các địa chỉ khác
+            if (addressData.isDefault) {
+                await User.updateOne(
+                    { _id: userId, "user_address.isDefault": true },
+                    { $set: { "user_address.$.isDefault": false } }
+                );
+            }
+
+            // Cập nhật các trường cho địa chỉ
+            address.name = addressData.name || address.name;
+            address.phone = addressData.phone || address.phone;
+            address.home_address = addressData.home_address || address.home_address;
+            address.province = addressData.province || address.province;
+            address.district = addressData.district || address.district;
+            address.commune = addressData.commune || address.commune;
+            address.isDefault = addressData.isDefault || address.isDefault;
+
+            // Lưu thay đổi
+            await user.save();
+
+            resolve({
+                status: 'SUCCESS',
+                message: 'Cập nhật địa chỉ thành công',
+                data: user.user_address,
+            });
+        } catch (err) {
+            reject({
+                status: 'ERROR',
+                message: 'Lỗi trong quá trình cập nhật địa chỉ',
+                error: err,
+            });
+        }
+    });
+};
+
+
+const deleteAddress = (userId, addressId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Người dùng không tồn tại',
+                });
+            }
+
+            // Kiểm tra xem địa chỉ có tồn tại hay không
+            const address = user.user_address.id(addressId);
+            if (!address) {
+                return reject({
+                    status: 'ERROR',
+                    message: 'Địa chỉ không tồn tại',
+                });
+            }
+
+            // Xóa địa chỉ khỏi danh sách
+            address.remove();
+
+            // Lưu thay đổi
+            await user.save();
+
+            return resolve({
+                status: 'SUCCESS',
+                message: 'Xóa địa chỉ thành công',
+                data: user.user_address, // Trả về danh sách địa chỉ còn lại
+            });
+        } catch (error) {
+            return reject({
+                status: 'ERROR',
+                message: 'Lỗi trong quá trình xóa địa chỉ',
+                error: error.message,
+            });
+        }
+    });
+};
+
+
+const setAddressDefault = (userId, addressId) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOne({
                 _id: userId,
-                "user_address._id" : addressId
+                "user_address._id": addressId
             })
-            if(!user){
+            if (!user) {
                 return reject({
                     status: 'ERROR',
                     message: 'Tai khoan nay khong ton tai hoac dia chi khong ton tai'
@@ -483,7 +676,7 @@ const setAddressDefault = (userId, addressId)=>{
             }
 
             await User.updateOne(
-                {_id: userId, "user_address.isDefault": true},
+                { _id: userId, "user_address.isDefault": true },
                 { $set: { "user_address.$.isDefault": false } }
             )
 
@@ -506,7 +699,7 @@ const setAddressDefault = (userId, addressId)=>{
 const getAllUser = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const allUser = await User.find().sort({createdAt: -1, updatedAt: -1})
+            const allUser = await User.find().sort({ createdAt: -1, updatedAt: -1 })
             return resolve({
                 status: 'OK',
                 message: 'Success',
@@ -550,13 +743,13 @@ const signInGoogle = (googleAccessToken) => {
                 });
             }
 
-            if(user){
+            if (user) {
                 await Cart.create({
-                user_id: user._id
+                    user_id: user._id
                 })
 
                 await Favor.create({
-                    user_id: user._id    
+                    user_id: user._id
                 })
             }
 
@@ -590,10 +783,13 @@ module.exports = {
     signIn,
     getDetailUser,
     editUser,
+    checkCurrentPass,
     changePassword,
     forgetPassword,
     deleteUser,
     addAddress,
+    updateAddress,
+    deleteAddress,
     setAddressDefault,
     getAllUser,
     signInGoogle

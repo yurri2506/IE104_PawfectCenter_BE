@@ -37,7 +37,7 @@ const sendOtp = async (email) => {
     console.log('OTP email sent and saved to Redis');
   } catch (error) {
     console.error('Error sending OTP email or saving to Redis:', error);
-
+    throw new Error(`Error sending OTP email or saving to Redis: ${error.message}`);
   }
 };
 
