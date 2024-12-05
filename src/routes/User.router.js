@@ -19,8 +19,8 @@ router.post('/forget-password', userController.forgetPassword)
 router.delete('/delete-user/:id', authUserMiddleWare, userController.deleteUser)
 router.post('/add-address/:id', authUserMiddleWare, userController.addAddress)
 router.put('/:id/address/:addressId', authUserMiddleWare, userController.updateAddress);
-router.delete('/:id/delete/:addressId', authUserMiddleWare, userController.deleteAddress);
-router.post('/:id/set-address-default/:address_id', authUserMiddleWare, userController.setAddressDefault)
+router.delete('/:id/delete-address/:addressId', authUserMiddleWare, userController.deleteAddress);
+router.put('/:id/set-address-default/:address_id', authUserMiddleWare, userController.setAddressDefault)
 router.post('/sign-out' ,  userController.signOut)  
 router.post('/refresh-token' ,  userController.refreshToken) 
 router.get('/notification/:id', authUserMiddleWare, notificationController.getAllNotify)
