@@ -362,7 +362,7 @@ const checkCurrentPass = (data, userId) => {
 
 const changePassword = (data, userId) => {
     return new Promise(async (resolve, reject) => {
-        const { password, newPassword, confirmNewPass } = data
+        const { newPassword, confirmNewPass } = data
         try {
             const user = await User.findById(userId)
 
@@ -604,7 +604,7 @@ const updateAddress = (userId, addressId, addressData) => {
             await user.save();
 
             resolve({
-                status: 'SUCCESS',
+                status: 'Successfully',
                 message: 'Cập nhật địa chỉ thành công',
                 data: user.user_address,
             });
@@ -631,8 +631,10 @@ const deleteAddress = (userId, addressId) => {
             }
 
             // Kiểm tra xem địa chỉ có tồn tại hay không
-            const address = user.user_address.id(addressId);
-            if (!address) {
+            const addressIndex = user.user_address.findIndex((addr) => addr._id.toString() === addressId.toString());
+
+            // Nếu không tìm thấy địa chỉ
+            if (addressIndex === -1) {
                 return reject({
                     status: 'ERROR',
                     message: 'Địa chỉ không tồn tại',
@@ -640,13 +642,13 @@ const deleteAddress = (userId, addressId) => {
             }
 
             // Xóa địa chỉ khỏi danh sách
-            address.remove();
+            user.user_address.splice(addressIndex, 1); // Loại bỏ địa chỉ bằng splice
 
             // Lưu thay đổi
             await user.save();
 
             return resolve({
-                status: 'SUCCESS',
+                status: 'Successfully',
                 message: 'Xóa địa chỉ thành công',
                 data: user.user_address, // Trả về danh sách địa chỉ còn lại
             });
@@ -659,6 +661,7 @@ const deleteAddress = (userId, addressId) => {
         }
     });
 };
+
 
 
 const setAddressDefault = (userId, addressId) => {
@@ -680,15 +683,17 @@ const setAddressDefault = (userId, addressId) => {
                 { $set: { "user_address.$.isDefault": false } }
             )
 
-            const updateAddressUser = await User.updateOne(
+            await User.updateOne(
                 { _id: userId, "user_address._id": addressId },
                 { $set: { "user_address.$.isDefault": true } }
             )
 
+            const updatedUser = await User.findOne({ _id: userId });
+
             return resolve({
-                status: "successfully",
+                status: "Successfully",
                 message: 'Dat dia chi mac dinh thanh cong',
-                data: updateAddressUser
+                data: updatedUser.user_address,
             })
         } catch (err) {
             return reject(err)

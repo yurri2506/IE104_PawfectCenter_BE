@@ -351,7 +351,7 @@ const addAddress = async(req, res) =>{
 
 const updateAddress = async (req, res) => {
     try {
-      const userId = req.params.userId; // ID người dùng
+      const userId = req.params.id; // ID người dùng
       const addressId = req.params.addressId; // ID địa chỉ cần cập nhật
   
       if (!userId || !addressId) {
@@ -378,7 +378,7 @@ const updateAddress = async (req, res) => {
 
   const deleteAddress = async (req, res) => {
     try {
-      const userId = req.params.userId; // ID người dùng
+      const userId = req.params.id; // ID người dùng
       const addressId = req.params.addressId; // ID địa chỉ cần cập nhật
   
       if (!userId || !addressId) {
@@ -387,9 +387,7 @@ const updateAddress = async (req, res) => {
           message: 'ID người dùng và ID địa chỉ là bắt buộc',
         });
       }
-  
-      const { name, phone, home_address, province, district, commune, isDefault } = req.body;
-  
+
       // Gọi service để xoa dia chi
       const response = await userService.deleteAddress(userId, addressId);
   
@@ -398,7 +396,7 @@ const updateAddress = async (req, res) => {
       console.error(err);
       return res.status(500).json({
         status: 'ERROR',
-        message: 'Lỗi khi xoa địa chỉ',
+        message: err.message,
       });
     }
   };
