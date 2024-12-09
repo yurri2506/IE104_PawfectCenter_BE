@@ -29,7 +29,7 @@ const createProduct = async (req, res) => {
       variants,
     } = req.body;
 
-    // Tạo slug tự động hoặc sử dụng tên sản phẩm
+    // Tạo slug tự động hoặc sử dụng tên sản phẩm 
     const slug = product_title
       ? slugify(product_title, { lower: true, strict: true })
       : crypto.randomBytes(6).toString("hex");
