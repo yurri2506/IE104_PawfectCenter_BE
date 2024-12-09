@@ -96,7 +96,8 @@ const getDetailsFavor = (id) => {
     try {
       const user = await Favor.findOne({
         user_id: id,
-      });
+      })
+      .populate('products.product_id', 'product_images product_title product_price product_percent_discount')
       if (user === null) {
         resolve({
           status: "ERR",

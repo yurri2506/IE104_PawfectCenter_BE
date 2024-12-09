@@ -192,7 +192,7 @@ const getDetailsProduct = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
   try {
-    const { limit, page, sort, search, priceMin, priceMax, product_brand, product_rate, pet_age, category_level_1, category_level_2,category_level_3, product_famous } = req.query;
+    const { limit, page, sort, search, priceMin, priceMax, product_brand, product_rate, pet_age, category_level_1, category_level_2,category_level_3, product_famous, product_category } = req.query;
 
     // Chuẩn bị các tham số lọc riêng lẻ
     const filters = {
@@ -205,6 +205,7 @@ const getAllProduct = async (req, res) => {
       priceMax: priceMax ? Number(priceMax) : undefined,
       product_rate: product_rate ? Number(product_rate) : undefined,
       pet_age: pet_age ? Number(pet_age) : undefined,
+      product_category,
     };
 
     // Gọi hàm service để lấy danh sách sản phẩm

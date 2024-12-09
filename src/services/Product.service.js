@@ -263,6 +263,10 @@ const getAllProduct = async (
     const query = { is_delete: false, product_display: true }; // Lọc sản phẩm chưa bị xóa và đang hiển thị
 
     // Thêm logic tìm kiếm theo từ khóa
+    if (filters.product_category) {
+      query.product_category = filters.product_category;
+    }
+
     if (search) {
       query.product_title = { $regex: search, $options: "i" };
     }
