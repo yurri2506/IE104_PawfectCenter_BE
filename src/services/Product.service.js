@@ -254,7 +254,7 @@ const getDetailsProduct = (id) => {
 
 const getAllProduct = async (
   limit = 0,
-  page = 0,
+  page = 1,
   sort = "",
   filters = {},
   search = ""
@@ -415,7 +415,7 @@ const getAllProduct = async (
       return { status: "OK", message: "No products found", data: [], total: 0 };
     }
 
-    const skip = page * limit;
+    const skip = Number(page-1) * limit;
 
     // Xác định kiểu sắp xếp
     let sortOptions = { createdAt: -1 }; // Mặc định là mới nhất trước
@@ -449,7 +449,7 @@ const getAllProduct = async (
       message: "Lấy thành công sản phẩm khi getAll",
       data: allProduct,
       total: totalProduct,
-      pageCurrent: Number(page)+1,
+      pageCurrent: Number(page),
       totalPage: Math.ceil(totalProduct / limit),
     };
   } catch (e) {

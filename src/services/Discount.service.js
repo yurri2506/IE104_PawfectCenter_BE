@@ -120,9 +120,77 @@ const getDiscountDetails = (id) => {
   });
 };
 
+const getAllDiscounts = async (cartItems) => {
+  try {
+    const discounts = await Discount.find({});
+
+    if (!discounts || discounts.length === 0) {
+      return {
+        status: "ERR",
+        message: "No discounts available",
+      };
+    }
+
+    // Lọc các mã giảm giá hợp lệ cho loại shipping
+    const validShippingDiscounts = discounts.filter((d) => 
+      d.discount_type === "shipping" &&
+      d.discount_number > 0 &&
+      new Date() >= new Date(d.discount_start_day) &&
+      new Date() <= new Date(d.discount_end_day)
+    );
+
+    // Lọc các mã giảm giá hợp lệ cho loại product
+    const validProductDiscounts = discounts.filter((d) => 
+      d.discount_type === "product" &&
+      d.discount_number > 0 &&
+      new Date() >= new Date(d.discount_start_day) &&
+      new Date() <= new Date(d.discount_end_day)
+    );
+
+    let applicableProductDiscounts = [];
+
+    // Nếu có cartItems (có sản phẩm trong giỏ hàng)
+    if (cartItems && cartItems.length > 0) {
+      // Kiểm tra các sản phẩm trong giỏ hàng để xem có mã giảm giá nào áp dụng
+      applicableProductDiscounts = validProductDiscounts.filter((discount) => {
+        return cartItems.some((item) => {
+          // Kiểm tra nếu sản phẩm có số lượng lớn hơn 0
+          return item.quantity > 0 && discount.discount_condition.some((condition) => {
+            // Kiểm tra nếu category_id của sản phẩm có trong danh sách category_id của mã giảm giá
+            return condition.category_id.some((categoryId) =>
+              item.category_id.includes(categoryId) // Kiểm tra trùng category_id
+            );
+          });
+        });
+      });
+    } else {
+      // Nếu không có cartItems (giỏ hàng trống), chỉ cần lọc theo số lượng > 0
+      applicableProductDiscounts = validProductDiscounts.filter((discount) => {
+        return discount.discount_number > 0;
+      });
+    }
+
+    return {
+      status: "OK",
+      message: "Lấy thông tin chi tiết về mã giảm giá thành công",
+      data: {
+        shippingDiscounts: validShippingDiscounts,  // Tất cả mã giảm giá shipping hợp lệ
+        productDiscounts: applicableProductDiscounts, // Tất cả mã giảm giá product áp dụng được cho sản phẩm
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching discounts:", error);
+    return {
+      status: "ERR",
+      message: "Không thể lấy thông tin mã giảm giá",
+    };
+  }
+};
+
 module.exports = {
   createDiscount,
   updateDiscount,
   deleteDiscount,
   getDiscountDetails,
+  getAllDiscounts,
 };

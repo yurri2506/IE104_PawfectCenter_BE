@@ -7,7 +7,7 @@ const cartSchema = new mongoose.Schema(
       {
         product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true, default: 1 },
-        variant: {type: mongoose.Schema.Types.ObjectId, required: true}
+        variant: { type: mongoose.Schema.Types.ObjectId, required: true },
       }
     ]
   },
@@ -16,6 +16,16 @@ const cartSchema = new mongoose.Schema(
     collection: "Cart"
   }
 );
+
+cartSchema.set('toJSON', { virtuals: true }); // Để virtuals có thể hiển thị
+
+// Cấm Mongoose tạo _id cho các phần tử trong mảng 'products'
+cartSchema.options.toJSON.transform = function (doc, ret) {
+  ret.products = ret.products.map(product => {
+    delete product._id; // Xóa _id nếu có
+    return product;
+  });
+};
 
 const Cart = mongoose.model('Cart', cartSchema);
 module.exports = Cart;
