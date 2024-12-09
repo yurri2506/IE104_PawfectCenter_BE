@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 
 const variantSchema = new mongoose.Schema(
   {
-    pet_age: { type: Number, required: true },
-    product_color: { type: String },
-    product_weight: { type: String },
-    product_size: { type: String },
     product_order_type: { type: String }, // mới thêm, oke không???
     variant_img: { type: String },
     product_price: { type: Number, required: true, default: 0 },
@@ -39,7 +35,7 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "Product"
+    collection: "Products"
   }
 );
 

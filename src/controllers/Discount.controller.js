@@ -14,7 +14,17 @@ const createDiscount = async (req, res) => {
       discount_condition,
     } = req.body;
 
-    if (!discount_title || discount_type ||!discount_code ||!discount_description ||!discount_start_day ||!discount_end_day ||!discount_amount ||!discount_number ||!discount_condition) {
+    if (
+      !discount_title ||
+      discount_type ||
+      !discount_code ||
+      !discount_description ||
+      !discount_start_day ||
+      !discount_end_day ||
+      !discount_amount ||
+      !discount_number ||
+      !discount_condition
+    ) {
       return res.status(200).json({
         status: "ERR",
         message: "Thiếu trường thông tin để tạo mã giảm giá",
@@ -106,9 +116,41 @@ const getDiscountDetails = async (req, res) => {
   }
 };
 
+const getAllDiscounts = async (req, res) => {
+  try {
+    const cartItems = req.body || []; 
+    console.log("bé nè2", cartItems)
+    // Kiểm tra nếu cartItems không có hoặc không phải mảng
+    // if (cartItems && !Array.isArray(cartItems)) {
+    //   return res.status(400).json({
+    //     status: "ERR",
+    //     message: "Giỏ hàng không hợp lệ",
+    //   });
+    // }
+
+    // Gọi hàm getAllDiscounts và truyền vào cartItems
+    const discountsResponse = await getAllDiscounts(cartItems);
+
+    // Kiểm tra nếu có lỗi trong việc lấy thông tin mã giảm giá
+    if (discountsResponse.status === "ERR") {
+      return res.status(400).json(discountsResponse);
+    }
+
+    // Trả về thông tin mã giảm giá
+    return res.status(200).json(discountsResponse); 
+  } catch (error) {
+    console.error("Error in getDiscounts controller:", error);
+    return res.status(500).json({
+      status: "ERR",
+      message: "Lỗi hệ thống, không thể lấy thông tin mã giảm giá",
+    });
+  }
+};
+
 module.exports = {
   createDiscount,
   updateDiscount,
   deleteDiscount,
   getDiscountDetails,
+  getAllDiscounts,
 };
