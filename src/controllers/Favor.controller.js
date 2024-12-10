@@ -32,16 +32,16 @@ const createFavor = async (req, res) => {
 
 const updateFavor = async (req, res) => {
   try {
-    const favorId = req.params.id;
+    const userId = req.params.id;
     const data = req.body;
-    if (!favorId) {
+    if (!userId) {
       return res.status(200).json({
         status: "ERR",
         message: "ID của mã favor không có, đây là trường bắt buộc",
       });
     }
 
-    const response = await FavorService.updateFavor(favorId, data);
+    const response = await FavorService.updateFavor(userId, data);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(500).json({
@@ -68,8 +68,28 @@ const getDetailsFavor = async (req, res) => {
     });
   }
 };
+
+const getAllProductByUserId = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The userId is required",
+      });
+    }
+    const response = await FavorService.getAllProductByUserId(id);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+
 module.exports = {
   createFavor,
   updateFavor,
   getDetailsFavor,
+  getAllProductByUserId,
 };

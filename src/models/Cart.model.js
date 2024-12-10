@@ -8,6 +8,8 @@ const cartSchema = new mongoose.Schema(
         product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true, default: 1 },
         variant: { type: mongoose.Schema.Types.ObjectId, required: true },
+        product_price: { type: Number, required: true, default: 1 },
+        product_order_type: {type: String, required: true}
       }
     ]
   },

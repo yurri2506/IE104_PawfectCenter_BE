@@ -32,16 +32,16 @@ const createCart = async (req, res) => {
 
 const updateCart = async (req, res) => {
   try {
-    const cartId = req.params.id;
+    const userId = req.params.id;
     const data = req.body;
-    if (!cartId) {
+    if (!userId) {
       return res.status(200).json({
         status: "ERR",
-        message: "ID của mã cart không có, đây là trường bắt buộc",
+        message: "ID của mã userId không có, đây là trường bắt buộc",
       });
     }
 
-    const response = await CartService.updateCart(cartId, data);
+    const response = await CartService.updateCart(userId, data);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(500).json({
