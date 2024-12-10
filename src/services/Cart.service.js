@@ -33,16 +33,16 @@ const createCart = async (newCart) => {
 };
 
 // Sửa cart
-const updateCart = async (cartId, data) => {
+const updateCart = async (userId, data) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(cartId)) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
       return {
         status: "ERR",
         message: "ID giỏ hàng không hợp lệ",
       };
     }
 
-    const checkCartId = await Cart.findOne({ _id: cartId });
+    const checkCartId = await Cart.findOne({ user_id: userId });
     if (!checkCartId) {
       return {
         status: "ERR",
@@ -60,7 +60,8 @@ const updateCart = async (cartId, data) => {
 
       if (existingProductIndex !== -1) {
         // Nếu sản phẩm và biến thể đã có trong giỏ hàng, cập nhật số lượng
-        checkCartId.products[existingProductIndex].quantity = newProduct.quantity;
+        checkCartId.products[existingProductIndex].quantity =
+          newProduct.quantity;
 
         // Nếu số lượng bằng 0, xóa sản phẩm khỏi giỏ hàng
         if (newProduct.quantity === 0) {
@@ -94,7 +95,7 @@ const getAllProductByUserId = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const user = await Cart.findOne({ user_id: id })
-      .populate('products.product_id', 'product_images product_title product_price product_percent_discount')
+      .populate('products.product_id', 'product_images product_title product_percent_discount')
       if (user === null) {
         resolve({
           status: "ERR",
@@ -115,22 +116,34 @@ const getAllProductByUserId = (id) => {
 
 const searchProductsInCart = async (userId, searchQuery) => {
   try {
-    const cart = await Cart.findOne({ user_id: userId }).populate('products.product_id').populate('products.variant');
+    const cart = await Cart.findOne({ user_id: userId })
+      .populate("products.product_id")
+      .populate("products.variant");
     if (!cart) {
-      return { status: 'ERR', message: 'Cart not found', data: null };
+      return { status: "ERR", message: "Cart not found", data: null };
     }
-    const matchingProducts = cart.products.filter(product => 
-      product.product_id.product_title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchingProducts = cart.products.filter((product) =>
+      product.product_id.product_title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
     );
-    return { status: 'OK', message: 'Products retrieved successfully', data: matchingProducts };
+    return {
+      status: "OK",
+      message: "Products retrieved successfully",
+      data: matchingProducts,
+    };
   } catch (error) {
-    return { status: 'ERR', message: error.message || 'Error retrieving products in cart', data: null };
+    return {
+      status: "ERR",
+      message: error.message || "Error retrieving products in cart",
+      data: null,
+    };
   }
-}
+};
 
 module.exports = {
   createCart,
   updateCart,
   getAllProductByUserId,
-  searchProductsInCart
+  searchProductsInCart,
 };
