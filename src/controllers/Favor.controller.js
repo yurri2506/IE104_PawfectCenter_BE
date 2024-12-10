@@ -87,9 +87,37 @@ const getAllProductByUserId = async (req, res) => {
   }
 };
 
+const deleteProductCart = async (req, res) => {
+  const data = req.body;
+  const userId = req.params.id;
+
+  try {
+    // Kiểm tra dữ liệu đầu vào
+    if (!userId || !data ) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Dữ liệu không hợp lệ. `user_id` và `products` là bắt buộc, và `products` phải là một mảng.",
+      });
+    }
+
+    // Gọi service để xử lý xóa sản phẩm
+    const result = await FavorService.deleteProductCart(userId, data);
+
+    // Trả về kết quả
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Lỗi trong controller:", error.message);
+    return res.status(500).json({
+      status: "ERR",
+      message: error.message || "Lỗi trong quá trình xóa sản phẩm khỏi yêu thích",
+    });
+  }
+};
+
 module.exports = {
   createFavor,
   updateFavor,
   getDetailsFavor,
   getAllProductByUserId,
+  deleteProductCart,
 };

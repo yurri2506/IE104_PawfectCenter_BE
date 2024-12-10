@@ -49,10 +49,11 @@ const updateFavor = async (userId, data) => {
         message: "Giỏ hàng yêu thích của người dùng chưa có trong dữ liệu",
       };
     }
-    const updatedFavor = await Favor.findByIdAndUpdate(checkFavorId._id, data, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedFavor = await Favor.findByIdAndUpdate(
+      checkFavorId._id,
+      { $addToSet: { products: { $each: data.products } } }, // Thêm các sản phẩm vào mảng products
+      { new: true, runValidators: true }
+    );
 
     return {
       status: "OK",
@@ -73,8 +74,10 @@ const getDetailsFavor = (id) => {
     try {
       const user = await Favor.findOne({
         user_id: id,
-      })
-      .populate('products.product_id', 'product_images product_title product_price product_percent_discount')
+      }).populate(
+        "products.product_id",
+        "product_images product_title product_price product_percent_discount"
+      );
       if (user === null) {
         resolve({
           status: "ERR",
@@ -96,8 +99,10 @@ const getDetailsFavor = (id) => {
 const getAllProductByUserId = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await Favor.findOne({ user_id: id })
-      .populate('products.product_id', 'product_images product_title product_percent_discount')
+      const user = await Favor.findOne({ user_id: id }).populate(
+        "products.product_id",
+        "product_images product_title product_percent_discount"
+      );
       if (user === null) {
         resolve({
           status: "ERR",
@@ -116,9 +121,52 @@ const getAllProductByUserId = (id) => {
   });
 };
 
+const deleteProductCart = async (userId, data) => {
+  try {
+    // Kiểm tra `userId` có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new Error("ID giỏ hàng không hợp lệ");
+    }
+
+    // Kiểm tra xem giỏ hàng có tồn tại không
+    const checkCartId = await Favor.findOne({ user_id: userId });
+    if (!checkCartId) {
+      throw new Error("Giỏ hàng của người dùng chưa có trong dữ liệu");
+    }
+
+    // Tạo điều kiện xóa từ danh sách products
+    const conditions = data.products.map((product) => ({
+      product_id: product.product_id,
+    }));
+
+    // Sử dụng $pull để xóa các sản phẩm
+    const updatedCart = await Favor.findOneAndUpdate(
+      { user_id: userId },
+      { $pull: { products: { $or: conditions } } },
+      { new: true } // Trả về giỏ hàng sau khi cập nhật
+    );
+
+    if (!updatedCart) {
+      throw new Error("Không tìm thấy yêu thích để cập nhật");
+    }
+    console.log(updatedCart);
+    return {
+      status: "OK",
+      message: "Xóa sản phẩm trong yêu thích thành công",
+      data: updatedCart,
+    };
+  } catch (error) {
+    return {
+      status: "ERR",
+      message: error.message,
+    };
+  }
+};
+
 module.exports = {
   createFavor,
   updateFavor,
   getDetailsFavor,
   getAllProductByUserId,
+  deleteProductCart,
 };

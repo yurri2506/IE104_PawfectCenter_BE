@@ -15,5 +15,14 @@ const favorSchema = new mongoose.Schema(
   }
 );
 
+favorSchema.set('toJSON', { virtuals: true }); // Để virtuals có thể hiển thị
+
+// Cấm Mongoose tạo _id cho các phần tử trong mảng 'products'
+favorSchema.options.toJSON.transform = function (doc, ret) {
+  ret.products = ret.products.map(product => {
+    delete product._id; // Xóa _id nếu có
+    return product;
+  });
+};
 const Favor = mongoose.model('Favor', favorSchema);
 module.exports = Favor;
