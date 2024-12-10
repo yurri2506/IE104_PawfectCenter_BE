@@ -51,6 +51,27 @@ const updateCart = async (req, res) => {
   }
 };
 
+const updateCart2 = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const data = req.body;
+    if (!userId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "ID của mã userId không có, đây là trường bắt buộc",
+      });
+    }
+
+    const response = await CartService.updateCart2(userId, data);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message || "Lỗi khi cập nhật cart",
+    });
+  }
+};
+
 const getAllProductByUserId = async (req, res) => {
   try {
     const id = req.params.id;
@@ -79,9 +100,39 @@ const searchProductsInCart = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: error.message || 'Error while searching products in cart' });
   }
 }
+
+const deleteProductCart = async (req, res) => {
+  const data = req.body;
+  const userId = req.params.id;
+
+  try {
+    // Kiểm tra dữ liệu đầu vào
+    if (!userId || !data ) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Dữ liệu không hợp lệ. `user_id` và `products` là bắt buộc, và `products` phải là một mảng.",
+      });
+    }
+
+    // Gọi service để xử lý xóa sản phẩm
+    const result = await CartService.deleteProductCart(userId, data);
+
+    // Trả về kết quả
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Lỗi trong controller:", error.message);
+    return res.status(500).json({
+      status: "ERR",
+      message: error.message || "Lỗi trong quá trình xóa sản phẩm khỏi giỏ hàng",
+    });
+  }
+};
+
 module.exports = {
   createCart,
   updateCart,
+  updateCart2,
   getAllProductByUserId,
   searchProductsInCart,
+  deleteProductCart,
 };

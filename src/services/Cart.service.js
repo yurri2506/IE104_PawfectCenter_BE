@@ -60,9 +60,8 @@ const updateCart = async (userId, data) => {
 
       if (existingProductIndex !== -1) {
         // Nếu sản phẩm và biến thể đã có trong giỏ hàng, cập nhật số lượng
-        checkCartId.products[existingProductIndex].quantity =
-          newProduct.quantity;
-
+        checkCartId.products[existingProductIndex].quantity +=
+          newProduct.quantity ;
         // Nếu số lượng bằng 0, xóa sản phẩm khỏi giỏ hàng
         if (newProduct.quantity === 0) {
           checkCartId.products.splice(existingProductIndex, 1);
@@ -141,9 +140,107 @@ const searchProductsInCart = async (userId, searchQuery) => {
   }
 };
 
+const deleteProductCart = async (userId, data) => {
+  try {
+    // Kiểm tra `userId` có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new Error("ID giỏ hàng không hợp lệ");
+    }
+
+    // Kiểm tra xem giỏ hàng có tồn tại không
+    const checkCartId = await Cart.findOne({ user_id: userId });
+    if (!checkCartId) {
+      throw new Error("Giỏ hàng của người dùng chưa có trong dữ liệu");
+    }
+
+    // Tạo điều kiện xóa từ danh sách products
+    const conditions = data.products.map((product) => ({
+      product_id: product.product_id,
+      variant: product.variant,
+    }));
+
+    // Sử dụng $pull để xóa các sản phẩm
+    const updatedCart = await Cart.findOneAndUpdate(
+      { user_id: userId },
+      { $pull: { products: { $or: conditions } } },
+      { new: true } // Trả về giỏ hàng sau khi cập nhật
+    );
+
+    if (!updatedCart) {
+      throw new Error("Không tìm thấy giỏ hàng để cập nhật");
+    }
+
+    return {
+      status: "OK",
+      message: "Xóa sản phẩm trong giỏ hàng thành công",
+      data: updatedCart,
+    };
+  } catch (error) {
+    return {
+      status: "ERR",
+      message: error.message,
+    };
+  }
+};
+
+const updateCart2 = async (userId, data) => {
+  try {
+    // Kiểm tra xem `userId` có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return {
+        status: "ERR",
+        message: "ID giỏ hàng không hợp lệ",
+      };
+    }
+
+    // Kiểm tra xem giỏ hàng của người dùng có tồn tại không
+    const checkCartId = await Cart.findOne({ user_id: userId });
+    if (!checkCartId) {
+      return {
+        status: "ERR",
+        message: "Giỏ hàng của người dùng chưa có trong dữ liệu",
+      };
+    }
+
+    // Tìm và cập nhật sản phẩm trong giỏ hàng
+    const product = checkCartId.products.find(
+      (item) =>
+        item?.product_id.toString() === data.products[0].product_id.toString() && // So sánh `product_id`
+        item?.variant.toString() === data.products[0].variant.toString()         // So sánh `variant`
+    );
+
+    if (!product) {
+      return {
+        status: "ERR",
+        message: "Sản phẩm không tồn tại trong giỏ hàng",
+      };
+    }
+
+    // Cập nhật quantity cho sản phẩm
+    product.quantity = data.products[0].quantity;
+
+    // Lưu giỏ hàng đã cập nhật
+    const updatedCart = await checkCartId.save();
+
+    return {
+      status: "OK",
+      message: "Cập nhật Cart thành công",
+      data: updatedCart,
+    };
+  } catch (e) {
+    return {
+      status: "ERR",
+      message: e.message || "Lỗi trong quá trình cập nhật giỏ hàng",
+    };
+  }
+};
+
+
 module.exports = {
   createCart,
   updateCart,
+  updateCart2,
   getAllProductByUserId,
   searchProductsInCart,
+  deleteProductCart,
 };
