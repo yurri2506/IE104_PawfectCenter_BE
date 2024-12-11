@@ -129,7 +129,7 @@ const getAllDiscounts = async (req, res) => {
     // }
 
     // Gọi hàm getAllDiscounts và truyền vào cartItems
-    const discountsResponse = await getAllDiscounts(cartItems);
+    const discountsResponse = await DiscountService.getAllDiscounts(cartItems);
 
     // Kiểm tra nếu có lỗi trong việc lấy thông tin mã giảm giá
     if (discountsResponse.status === "ERR") {
