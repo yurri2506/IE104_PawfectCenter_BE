@@ -24,4 +24,5 @@ router.put('/:id/set-address-default/:address_id', authUserMiddleWare, userContr
 router.post('/sign-out' ,  userController.signOut)  
 router.post('/refresh-token' ,  userController.refreshToken) 
 router.get('/notification/:id', authUserMiddleWare, notificationController.getAllNotify)
+router.patch('/:id/notification-read/:notifyId', authUserMiddleWare, notificationController.updateNotify)
 module.exports = router

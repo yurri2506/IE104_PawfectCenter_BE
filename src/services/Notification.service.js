@@ -85,8 +85,36 @@ const getDetailNotify = (notifyId) => {
     })
 }
 
+
+const updateNotify = (notifyId, data) => {
+    return new Promise(async(resolve, reject)=>{
+        try {
+    
+            const notifications = await Notification.findByIdAndUpdate(
+                notifyId, data, {
+                    new: true,
+                    runValidators: true}
+            )
+
+            console.log(notifications)
+            return resolve({
+                status: 'OK',
+                data: notifications,
+                message: 'Cap nhat thanh cong.'
+            })
+        } catch (error) {
+            console.error('Lỗi khi cap nhat thông báo:', error);
+            return reject({
+                status: 'ERROR',
+                message: error.message
+            })
+        }
+    })
+}
+
 module.exports = {
     createNotify,
     getAllNotify,
-    getDetailNotify
+    getDetailNotify,
+    updateNotify
 }
