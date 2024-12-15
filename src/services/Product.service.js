@@ -233,7 +233,8 @@ const getDetailsProduct = (id) => {
     try {
       const product = await Product.findOne({
         _id: id,
-      });
+      })
+      .populate("product_category", "category_title category_parent_id category_level")
       if (product === null) {
         resolve({
           status: "ERR",
@@ -444,7 +445,7 @@ const getAllProduct = async (
       .limit(limit)
       .skip(skip)
       .sort(sortOptions)
-      .populate("product_category", "category_name") // Populate tên danh mục từ ObjectId
+      .populate("product_category", "category_title category_parent_id category_level") // Populate tên danh mục từ ObjectId
       .populate("product_feedback"); // Populate đánh giá sản phẩm
     
       console.log("Number of products returned:", allProduct.length);
