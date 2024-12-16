@@ -1,15 +1,4 @@
 const FeedbackService = require("../services/Feedback.service");
-const multer = require("multer");
-const slugify = require("slugify");
-const crypto = require("crypto");
-
-// Cấu hình Multer để lưu file vào bộ nhớ tạm
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
-const uploadFields = upload.fields([
-  { name: "feedback_img", maxCount: 3 }
-]);
 
 const createFeedback = async (req, res) => {
   try {
@@ -21,11 +10,6 @@ const createFeedback = async (req, res) => {
       content,
       rating,
     } = req.body;
-
-    const feedback_img =
-    req.files["feedback_img"]?.map((file) => {
-      return file.buffer.toString("base64");
-    }) || [];
 
     if (!product_id) {
       return res.status(200).json({
@@ -166,5 +150,4 @@ module.exports = {
   updateFeedback,
   deleteFeedback,
   getAllFeedback,
-  uploadFields
 };

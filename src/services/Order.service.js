@@ -497,7 +497,8 @@ const getOrdersByStatus = async (orderStatus, userId) => {
     }
 
     // Tìm đơn hàng theo filter
-    const orders = await Order.find(filter);
+    const orders = await Order.find(filter)
+    .populate("products.product_id", "product_images product_title product_percent_discount")
 
     if (orders.length === 0) {
       throw new Error("Không có đơn hàng thỏa mãn yêu cầu");

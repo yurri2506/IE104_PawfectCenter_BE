@@ -52,7 +52,7 @@ const orderSchema = new mongoose.Schema(
     },
     order_payment: {
       type: String,
-      enum: ["credit_card", "paypal", "cod"],
+      enum: ["credit_card", "paypal", "cod", "apple_pay", "momo"],
       required: true,
       default: "cod",
     },
@@ -71,6 +71,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     order_note: { type: String },
+    is_feedback: { type: Boolean}
   },
   {
     timestamps: true,
