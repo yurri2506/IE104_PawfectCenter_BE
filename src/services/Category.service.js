@@ -7,7 +7,7 @@ const createCategory = async (newCategory) => {
   try {
     const { category_title, category_parent_id, isActive, slug } = newCategory;
     let category_level = 1;
-    let finalSlug = slug;
+    let finalSlug = slug; 
 
     if (category_parent_id && category_parent_id !== "0") {
       const parentCategory = await Category.findById(category_parent_id);
