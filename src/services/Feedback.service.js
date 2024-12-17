@@ -11,7 +11,6 @@ const createFeedback = async (newFeedback) => {
       order_id,
       user_id,
       content,
-      feedback_img,
       rating,
     } = newFeedback;
 
