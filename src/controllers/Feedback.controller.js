@@ -3,20 +3,20 @@ const FeedbackService = require("../services/Feedback.service");
 const createFeedback = async (req, res) => {
   try {
     const {
-      product_id,
+      product_id, 
       variant_id,
-      order_id,
+      order_id, 
       user_id,
       content,
       rating,
     } = req.body;
 
-    if (!product_id) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Mã sản phẩm là bắt buộc",
-      });
-    }
+    // if (!product_id) {
+    //   return res.status(200).json({
+    //     status: "ERR",
+    //     message: "Mã sản phẩm là bắt buộc",
+    //   });
+    // }
 
     // if (!variant_id) {
     //   return res.status(200).json({
@@ -25,33 +25,33 @@ const createFeedback = async (req, res) => {
     //   });
     // }
 
-    if (!order_id) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Mã đơn hàng là bắt buộc",
-      });
-    }
+    // if (!order_id) {
+    //   return res.status(200).json({
+    //     status: "ERR",
+    //     message: "Mã đơn hàng là bắt buộc",
+    //   });
+    // }
 
-    if (!user_id) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Mã người dùng là bắt buộc",
-      });
-    }
+    // if (!user_id) {
+    //   return res.status(200).json({
+    //     status: "ERR",
+    //     message: "Mã người dùng là bắt buộc",
+    //   });
+    // }
 
-    if (!content) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Nội dung feedback từ người dùng là bắt buộc",
-      });
-    }
+    // if (!content) {
+    //   return res.status(200).json({
+    //     status: "ERR",
+    //     message: "Nội dung feedback từ người dùng là bắt buộc",
+    //   });
+    // }
 
-    if (!rating) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Số sao đánh giá là bắt buộc",
-      });
-    }
+    // if (!rating) {
+    //   return res.status(200).json({
+    //     status: "ERR",
+    //     message: "Số sao đánh giá là bắt buộc",
+    //   });
+    // }
 
     const newFeedbackData = {
       product_id,
@@ -59,7 +59,6 @@ const createFeedback = async (req, res) => {
       order_id,
       user_id,
       content,
-      feedback_img,
       rating,
     };
 
