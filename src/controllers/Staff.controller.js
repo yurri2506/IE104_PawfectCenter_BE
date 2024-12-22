@@ -51,8 +51,23 @@ const deleteStaff = async(req, res)=>{
     }
 }
 
+const getAllStaff =  async(req, res) =>{
+    try {
+
+        const response = await staffService.getAllStaff()
+        console.log(response)
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERROR',
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     changePassword,
     updateStaff,
-    deleteStaff
+    deleteStaff,
+    getAllStaff
 }
