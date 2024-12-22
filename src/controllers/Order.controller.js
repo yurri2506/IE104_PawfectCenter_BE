@@ -91,6 +91,25 @@ const getOrdersByStatus = async (req, res) => {
     });
   }
 };
+
+const getAll = async (req, res) => {
+  try {
+    const { orderStatus } = req.query; // Lấy dữ liệu từ query parameters
+
+    // Gọi service để lấy dữ liệu
+    const result = await OrderService.getAll(orderStatus);
+
+    // Trả về thành công
+    res.status(200).json(result);
+  } catch (error) {
+    // Xử lý lỗi và trả về phản hồi
+    res.status(400).json({
+      status: "ERR",
+      message: error.message || "Đã xảy ra lỗi trong quá trình xử lý lấy đơn hàng",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   updateOrder,
@@ -98,4 +117,5 @@ module.exports = {
   // getUserOrders,
   previewOrder,
   getOrdersByStatus,
+  getAll,
 };

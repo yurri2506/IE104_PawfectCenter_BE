@@ -443,7 +443,8 @@ const getOrderDetails = async (orderId) => {
       };
     }
 
-    const orderDetails = await Order.findById(orderId);
+    const orderDetails = await Order.findById(orderId)
+    .populate("products.product_id", "product_images product_title product_percent_discount")
 
     if (!orderDetails) {
       return {
@@ -516,6 +517,52 @@ const getOrdersByStatus = async (orderStatus, userId) => {
   }
 };
 
+const getAll = async (orderStatus) => {
+  try {
+    let filter = {};
+
+    // Xử lý lọc theo orderStatus
+    if (orderStatus) {
+      if (orderStatus.toLowerCase() === "all") {
+        filter = {}; // Lấy tất cả đơn hàng
+      } else if (
+        [
+          "Chờ xác nhận",
+          "Đang chuẩn bị hàng",
+          "Đang giao",
+          "Giao hàng thành công",
+          "Hoàn hàng",
+          "Hủy hàng",
+        ].includes(orderStatus)
+      ) {
+        filter.order_status = orderStatus; // Lọc theo trạng thái đơn hàng
+      } else {
+        throw new Error(
+          "Không có đơn hàng thuộc trạng thái đã yêu cầu hoặc trạng thái không hợp lệ"
+        );
+      }
+    }
+
+    // Tìm đơn hàng theo filter
+    const orders = await Order.find(filter)
+    .populate("products.product_id", "product_images product_title product_percent_discount")
+
+    if (orders.length === 0) {
+      throw new Error("Không có đơn hàng thỏa mãn yêu cầu");
+    }
+
+    return {
+      status: "OK",
+      message: "Lấy danh sách đơn hàng thành công",
+      data: orders,
+    };
+  } catch (error) {
+    throw new Error(
+      error.message || "Đã xảy ra lỗi khi lấy danh sách đơn hàng"
+    );
+  }
+};
+
 module.exports = {
   createOrder,
   updateOrder,
@@ -523,4 +570,5 @@ module.exports = {
   // getUserOrders,
   previewOrder,
   getOrdersByStatus,
+  getAll,
 };
