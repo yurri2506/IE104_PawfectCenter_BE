@@ -60,19 +60,9 @@ const updateStore = async (req, res) => {
         message: "ID của store không có, đây là trường bắt buộc",
       });
     }
-    let store_img = [];
-    // Xử lý ảnh feedback_img nếu có trong yêu cầu cập nhật
-    store_img = req.files["store_img"]?.map((file) => {
-      return file.buffer.toString("base64");
-    });
 
     // Xây dựng dữ liệu cập nhật
     const updateData = { ...req.body };
-
-    // Chỉ thêm store_img vào updateData nếu có ảnh mới
-    if (store_img && store_img.length > 0) {
-      updateData.store_img = store_img;
-    }
 
     const response = await StoreService.updateStore(storeId, updateData);
     return res.status(200).json(response);

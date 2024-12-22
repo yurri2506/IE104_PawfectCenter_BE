@@ -25,4 +25,6 @@ router.post('/sign-out' ,  userController.signOut)
 router.post('/refresh-token' ,  userController.refreshToken) 
 router.get('/notification/:id', authUserMiddleWare, notificationController.getAllNotify)
 router.patch('/:id/notification-read/:notifyId', authUserMiddleWare, notificationController.updateNotify)
+router.get('/get-all-user', userController.getAllUser)
+
 module.exports = router
