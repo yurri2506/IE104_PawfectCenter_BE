@@ -226,6 +226,7 @@ const deleteStaff = ( id) => {
         }
     });
 };
+
 module.exports = {
     createStaff,
     changePassword,
