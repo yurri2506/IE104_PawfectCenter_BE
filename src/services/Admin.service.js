@@ -104,41 +104,41 @@ const createAdmin = (newAdmin) =>{
     })
 }
 
-// const createStaff = (newStaff) =>{
-//     return new Promise(async(resolve, reject) => {
-//         const {name, email, phone, password, confirmPassword, role} = newStaff
-//         try {
-//             const checkStaff = await Staff.findOne({
-//                 admin_name: name, 
-//                 admin_email: email
-//             })
-//             if(checkStaff){
-//                 return reject({
-//                     status: 'ERROR',
-//                     message: 'Tai khoan Staff da ton tai'
-//                 })
-//             }
+const createStaff = (newStaff) =>{
+    return new Promise(async(resolve, reject) => {
+        const {name, email, phone, password, confirmPassword, role} = newStaff
+        try {
+            const checkStaff = await Staff.findOne({
+                admin_name: name, 
+                admin_email: email
+            })
+            if(checkStaff){
+                return reject({
+                    status: 'ERROR',
+                    message: 'Tai khoan Staff da ton tai'
+                })
+            }
 
-//             const hash = await bcrypt.hash(password, 10)
-//             const staff = await Staff.create({
-//                 staff_email: email,
-//                 staff_name: name,
-//                 staff_phone: phone,
-//                 staff_password: hash,
-//                 staff_role: role
-//             })
+            const hash = await bcrypt.hash(password, 10)
+            const staff = await Staff.create({
+                staff_email: email,
+                staff_name: name,
+                staff_phone: phone,
+                staff_password: hash,
+                staff_role: role
+            })
 
-//             console.log(staff)
-//             return resolve({
-//                 status: 'OK',
-//                 message: 'Tao tai khoan staff thanh cong!',
-//                 data: staff
-//             })
-//         } catch (error) {
-//             return reject(error)
-//         }
-//     })
-// }
+            console.log(staff)
+            return resolve({
+                status: 'OK',
+                message: 'Tao tai khoan staff thanh cong!',
+                data: staff
+            })
+        } catch (error) {
+            return reject(error)
+        }
+    })
+}
 
 
 const forgetPassword = (data) => {
@@ -296,5 +296,6 @@ module.exports = {
     forgetPassword,
     changePassword,
     updateAdmin,
-    getDetailAdmin
+    getDetailAdmin,
+    createStaff,
 }
