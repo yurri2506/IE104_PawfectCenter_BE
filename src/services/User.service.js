@@ -537,7 +537,11 @@ const addAddress = (userId, newAddress) => {
                 })
             }
 
-            if (newAddress.isDefault) {
+            const hasAddresses = user.user_address && user.user_address.length > 0;
+
+            if (!hasAddresses) {
+                newAddress.isDefault = true;
+            } else if (newAddress.isDefault) {
                 await User.updateOne(
                     { _id: userId, "user_address.isDefault": true },
                     { $set: { "user_address.$.isDefault": false } }
