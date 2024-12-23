@@ -46,7 +46,7 @@ const orderSchema = new mongoose.Schema(
         "Đang giao", 
         "Hoàn thành", 
         "Hoàn hàng",
-        "Đã hủy",
+        "Hủy hàng",
       ],
       default: "Chờ xác nhận",
     },
