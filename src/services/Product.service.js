@@ -426,9 +426,9 @@ const getAllProduct = async (
     let sortOptions = { createdAt: -1 }; // Mặc định là mới nhất trước
     if (sort) {
       if (sort === "price_asc") {
-        sortOptions = { "variants.product_price": 1 }; // Giá tăng dần
+        sortOptions = { "product_price": 1 }; // Giá tăng dần
       } else if (sort === "price_desc") {
-        sortOptions = { "variants.product_price": -1 }; // Giá giảm dần
+        sortOptions = { "product_price": -1 }; // Giá giảm dần
       } else if (sort === "best_selling") {
         sortOptions = { product_selled: -1 }; // Sản phẩm bán chạy nhất
       } else if (sort === "popular") {
