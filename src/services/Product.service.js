@@ -26,7 +26,7 @@ const createProduct = (newProduct) => {
       // Kiểm tra trùng lặp tiêu đề sản phẩm
       const checkProductTitle = await Product.findOne({ product_title });
       if (checkProductTitle !== null) {
-        return resolve({
+        return reject({
           status: "ERR",
           message: "Sản phẩm đã tồn tại.",
         });
@@ -35,7 +35,7 @@ const createProduct = (newProduct) => {
       // Kiểm tra sự tồn tại của danh mục sản phẩm
       const checkProductCategory = await Category.findById(product_category);
       if (checkProductCategory == null) {
-        return resolve({
+        return reject({
           status: "ERR",
           message: "Danh mục sản phẩm không tồn tại.",
         });

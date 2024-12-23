@@ -2,7 +2,7 @@ const ProductService = require("../services/Product.service");
 const multer = require("multer");
 const slugify = require("slugify");
 const crypto = require("crypto");
-
+const { uploadImage } = require("../config/cloudinary.config");
 // Cấu hình Multer để lưu file vào bộ nhớ tạm
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -29,29 +29,42 @@ const createProduct = async (req, res) => {
       variants,
     } = req.body;
 
-    // Tạo slug tự động hoặc sử dụng tên sản phẩm 
     const slug = product_title
       ? slugify(product_title, { lower: true, strict: true })
       : crypto.randomBytes(6).toString("hex");
 
-    // Chuyển đổi `product_images` từ file sang chuỗi Base64
-    const product_images =
-      req.files["product_images"]?.map((file) => file.buffer.toString("base64")) || [];
+    // Upload ảnh chính
+    const product_images = [];
+    if (req.files["product_images"]) {
+      for (const file of req.files["product_images"]) {
+        const imageUrl = await uploadImage(file.buffer);
+        product_images.push(imageUrl);
+      }
+    }
 
-    // Parse `variants` từ chuỗi JSON sang mảng object
-    const parsedVariants = JSON.parse(variants || "[]");
+    // Upload ảnh biến thể
+    let parsedVariants = [];
+    try {
+      parsedVariants = JSON.parse(variants || "[]");
+    } catch (error) {
+      return res.status(400).json({ message: "Invalid JSON format for variants" });
+    }
 
-    // Xử lý từng biến thể và ánh xạ ảnh của biến thể
-    const updatedVariants = parsedVariants.map((variant, index) => {
+    const updatedVariants = [];
+    for (let index = 0; index < parsedVariants.length; index++) {
+      const variant = parsedVariants[index];
       const variantFieldName = `variant_img_${index}`;
-      const variantFile = req.files[variantFieldName]?.[0]; // Lấy file của biến thể theo tên trường
-      variant.variant_img = variantFile
-        ? variantFile.buffer.toString("base64") // Chuyển file thành Base64
-        : null; // Nếu không có ảnh, đặt giá trị null
-      return variant;
-    });
+      if (req.files && req.files[variantFieldName] && req.files[variantFieldName][0]) {
+        const variantFile = req.files[variantFieldName][0];
+        const variantImageUrl = await uploadImage(variantFile.buffer);
+        variant.variant_img = variantImageUrl;
+      } else {
+        variant.variant_img = variant.variant_img || null;
+      }
+      updatedVariants.push(variant);
+    }
 
-    // Dữ liệu sản phẩm cần lưu vào database
+    // Tạo sản phẩm
     const newProductData = {
       product_title,
       product_category,
@@ -67,69 +80,92 @@ const createProduct = async (req, res) => {
       slug,
     };
 
-    // Lưu sản phẩm
     const response = await ProductService.createProduct(newProductData);
     return res.status(200).json(response);
   } catch (error) {
+    console.error("Error creating product:", error);
     return res.status(500).json({ message: error.message || "Lỗi khi tạo sản phẩm" });
   }
 };
-
 
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
 
+    // Kiểm tra productId
     if (!productId) {
-      return res.status(200).json({
+      return res.status(400).json({
         status: "ERR",
         message: "The productId is required",
       });
     }
 
-    // Kiểm tra xem req.files có tồn tại và có chứa "product_image"
-    let product_images = [];
-    if (req.files && req.files["product_image"]) {
-      product_images = req.files["product_image"].map((file) => {
-        return file.buffer.toString("base64");
+    // Lấy sản phẩm hiện tại từ database
+    const existingProduct = await ProductService.getDetailsProduct(productId);
+    if (!existingProduct) {
+      return res.status(404).json({
+        status: "ERR",
+        message: "Sản phẩm không tồn tại",
       });
     }
 
-    // Nếu không có ảnh mới, giữ nguyên ảnh cũ từ cơ sở dữ liệu
-    if (!product_images || product_images.length === 0) {
-      const existingProduct = await ProductService.getDetailsProduct(productId);
-      product_images = existingProduct.product_images;
+    // 1. Xử lý ảnh sản phẩm chính (product_images)
+    let product_images = [];
+    if (req.files && req.files["product_image"]) {
+      for (const file of req.files["product_image"]) {
+        // Upload từng ảnh lên Cloudinary
+        const imageUrl = await uploadImage(file.buffer);
+        product_images.push(imageUrl);
+      }
+    } else {
+      // Nếu không có ảnh mới, giữ ảnh cũ
+      product_images = existingProduct.product_images || [];
     }
 
-    // Xử lý cập nhật ảnh cho các biến thể nếu có
+    // 2. Xử lý ảnh của biến thể (variants)
     const parsedVariants = req.body.variants ? JSON.parse(req.body.variants) : [];
-    const updatedVariants = parsedVariants.map((variant, index) => {
+    const updatedVariants = [];
+    for (let index = 0; index < parsedVariants.length; index++) {
+      const variant = parsedVariants[index];
+
+      // Kiểm tra ảnh mới cho biến thể
       if (req.files && req.files[`variant_img_${index}`]) {
         const variantFile = req.files[`variant_img_${index}`][0];
         if (variantFile) {
-          variant.variant_img = variantFile.buffer.toString("base64");
+          // Upload ảnh biến thể lên Cloudinary
+          const variantImageUrl = await uploadImage(variantFile.buffer);
+          variant.variant_img = variantImageUrl;
         }
+      } else {
+        // Giữ nguyên ảnh cũ nếu không có ảnh mới
+        variant.variant_img = variant.variant_img || null;
       }
-      return variant;
-    });
 
-    // Xây dựng dữ liệu cập nhật
+      updatedVariants.push(variant);
+    }
+
+    // 3. Xây dựng dữ liệu cập nhật
     const updateData = {
       ...req.body,
-      product_images,
-      variants: updatedVariants,
+      product_images, // Danh sách URL của ảnh chính
+      variants: updatedVariants, // Danh sách biến thể đã cập nhật
     };
 
-    // Gọi service để cập nhật sản phẩm
+    // 4. Gọi service để cập nhật sản phẩm
     const response = await ProductService.updateProduct(productId, updateData);
+
+    // 5. Phản hồi thành công
     return res.status(200).json(response);
   } catch (e) {
+    // Phản hồi lỗi
+    console.error("Error updating product:", e);
     return res.status(500).json({
       status: "ERR",
       message: e.message || "Lỗi khi cập nhật sản phẩm",
     });
   }
 };
+
 
 const deleteProduct = async (req, res) => {
   try {
