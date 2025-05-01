@@ -1,87 +1,147 @@
-# [IE104.P11.Group1] - ĐỒ ÁN XÂY DỰNG WEBSITE KINH DOANH SẢN PHẨM DÀNH CHO THÚ CƯNG PAWFECT PHẦN BACK_END
+# [IE104.P11.Group1] - PROJECT: WEBSITE FOR SELLING PET PRODUCTS - **PAWFECT** (FRONTEND FOR USERS)
 
-* Trường Đại học Công nghệ Thông tin, Đại học Quốc gia Thành phố Hồ Chí Minh (ĐHQG-HCM)
-* Khoa: Khoa học và Kỹ thuật Thông tin (KH&KTTT)
-* GVHD: ThS. Võ Tấn Khoa
-* Nhóm sinh viên thực hiện: Nhóm 1
+* University of Information Technology, VNU-HCM  
+* Faculty: Information Science and Engineering  
+* Instructor: Ths. Võ Tấn Khoa  
+* Student Group: Group 1
 
-## FORM đóng góp ý kiến: [Form đóng góp ý kiến](https://forms.gle/VU4rxi5Z8cxpAJTA8)
+## 📢 Feedback Form: [Submit your feedback here](https://forms.gle/VU4rxi5Z8cxpAJTA8)
 
-## Danh sách thành viên
-|STT | Họ tên | MSSV|Chức vụ|
-|:---:|:-------------:|:-----:|:-----:|
-|1. 	| Nguyễn Lê Thanh Huyền | 225220590| Nhóm trưởng |
-|2. 	| Võ Văn Phi Thông		| 22521435 | Thành viên |
-|3. 	| Nguyễn Ngọc Thanh Tuyền		|	22521631 | Thành viên |
-|4.  | Võ Thị Phương Uyên | 22521645 | Thành viên |
-|5. 	| Phạm Quang Vũ | 22521696 | Thành viên |
+## 👥 Team Members
 
-## Tính năng
-|ID	|Tên tác nhân |	Mô tả tác nhân|
-|:---:|:-------------:|:-----:|
-|AC1	|Unauthenticated User (Khách vãng lai) |	Người sử dụng trang web không có tài khoản hoặc có tài khoản mà chưa đăng nhập, chỉ được thực hiện một số chức năng như xem sản phẩm, xem thông tin cửa hàng, các bài viết,...|
-|AC2	|Authenticated User (Khách hàng) |	Người dùng có tài khoản (khách hàng) có thể thực hiện các chức năng mua sản phẩm, thêm giỏ hàng, thêm yêu thích, thay đổi thông tin cá nhân,...|
-|AC3 |Staff (Nhân viên) | Nhân viên có tài khoản trong hệ thống. Tài khoản được cấp bởi quản trị viên. Sử dụng hệ thống để cập nhật đơn hàng, quản lý đánh giá sản phẩm, cập nhật trạng thái, quản lý bài viết,...|
-|AC4 |Administrator | Là người dùng có quyền hạn cao nhất trong hệ thống. Quản trị viên có thể quản lý người dùng, quản lý đơn hàng, quản lý nhân viên, quản lý sản phẩm,…Quản trị viên đảm bảo hoạt động chung của hệ thống, bảo mật, và có quyền cấp phép và phân quyền cho các tài khoản khác trong hệ thống.|
+| No. | Full Name | Student ID | Role |
+|:---:|:-----------------------------:|:--------:|:------------:|
+| 1.  | Nguyễn Lê Thanh Huyền        | 225220590 | Leader      |
+| 2.  | Võ Văn Phi Thông             | 22521435  | Member      |
+| 3.  | Nguyễn Ngọc Thanh Tuyền      | 22521631  | Member      |
+| 4.  | Võ Thị Phương Uyên           | 22521645  | Member      |
+| 5.  | Phạm Quang Vũ                | 22521696  | Member      |
 
-|Mã chức năng	|	Tên chức năng	|	Tác nhân	| Hoàn thành |
-|:---:|:-------------:|:-----:|:-----:|
-||	UC1. QLBH	(Quản lý bán hàng)					||
-|	UC1.01	|	Quản lý sản phẩm	|	Admin 	| 0%|
-|	UC1.02	|	Tìm kiếm sản phẩm 	|	Unauthenticated User	| 100%|
-|	UC1.03	|	Xem chi tiết sản phẩm	|	Unauthenticated User 	| 100%|
-|	UC1.04	|	Thêm vào giỏ hàng	|	Authenticated User 	| 100%|
-|	UC1.05	|	Xem giỏ hàng	|	Authenticated User 	| 100%|
-|	UC1.06	|	Thêm sản phẩm vào yêu thích	|	Authenticated User 	| 100%|
-|	UC1.07	|	Xem sản phẩm yêu thích	|	Authenticated User	| 100%|
-|	UC1.08	|	Mua ngay sản phẩm	|	Authenticated User	| 0%|
-|	UC1.09	|	Mua hàng	|	Authenticated User	| 100%|
-|	UC1.10	|	Thanh toán	|	Authenticated User	| 100%|
-|	UC1.11	|	Đánh giá sản phẩm	|	Authenticated User	| 100%|
-|	UC1.12	|	Quản lý đánh giá	|	Staff, Admin	| 0%|
-|	UC1.13	|	Xem sản phẩm	|	Unauthenticated User	| 100%|
-||	UC2. QLKHO	 (Quản lý Kho)					||
-  |	UC2.01	|	Thêm mặt hàng	|	Admin, Staff	| 0%|
-|	UC2.02	| Chỉnh sửa số lượng sản phẩm	|	Admin, Staff	| 0%|
-|	UC2.03	|	Kiểm tra tồn kho	|	Admin, Staff	| 0%|
-|	UC2.04	|	Xóa hàng tồn kho	|	Admin, Staff	| 0%|
-||	UC3. QLKH (Quản lý khách hàng)					||
-|	UC3.01	|	Đăng ký	|	Unauthenticated User	| 100%|
-|	UC3.02	|	Đăng nhập	|	Unauthenticated User, Admin, Staff	| 100%|
-|	UC3.03	|	Đổi mật khẩu	|	Unauthenticated User, Admin, Staff	| 100%|
-|	UC3.04	|	Chỉnh sửa thông tin	|	Unauthenticated User, Admin, Staff	| 100%|
-|	UC3.05	|	Xem thông tin	|	Unauthenticated User, Admin, Staff	| 100%|
-|	UC3.06	|	Xóa tài khoản vi phạm	|	Admin, Staff	| 0%|
-|	UC3.07	|	Quên mật khẩu	|	Unauthenticated User, Admin, Staff	| 100%|
-||	UC4. QLDH (Quản lý đơn hàng)||
-|	UC4.01	| Xác nhận đơn hàng	|	Staff, Admin	| 0%|
-|	UC4.02	| Hủy đơn hàng	|	Authenticated User, Staff, Admin	| 0%|
-|	UC4.03	|	Yêu cầu hoàn hàng	| Authenticated User | 0%|
-|	UC4.04	| Xử lý hoàn hàng	|	Staff, Admin	| 0%|
-|	UC4.05	|	Xem trạng thái đơn hàng	|	Authenticated User, Staff, Admin	| 100%|
-|	UC4.06	|	Cập nhật tráng thái đơn hàng	|	Staff, Admin	| 0%|
-||	UC5. QLDT (Quản lý doanh thu)||
-|	UC5.01	|	Xem doanh thu	|	Admin	| 0%|
-|	UC5.02	|	Xem lịch sử giao dịch |	Admin	| 0%|
-||	UC6. QLNV (Quản lý nhân viên)||
-|	UC5.01	|	Thêm nhân viên	|	Admin	| 0%|
-|	UC6.02	|	Xóa nhân viên |	Admin	| 0%|
-|	UC6.03	|	Sửa nhân viên	|	Admin	| 0%|
-|	UC6.04	|	Xem thông tin nhân viên |	Staff, Admin	| 0%|
-||	UC7. QLCH (Quản lý cửa hàng)||
-|	UC5.01	|	Cập nhật thông tin cửa hàng	|	Admin	| 0%|
-|	UC5.02	|	Cập nhật thông tin admin |	Admin	| 0%|
+## 🌟 Actors Description
 
-## Công nghệ sử dụng
-* [Node.js] - Xử lý API, Back-end
-* [React.js] - Font-end
-* [Express] - Framework nằm trên chức năng máy chủ web của NodeJS
-* [MongoDB Compass] - Cung cấp giao diện xem cơ sở dữ liệu MongoDB
-* [MongoDB] - Hệ quản trị cơ sở dữ liệu phi quan hệ sử dụng để lưu trữ dữ liệu cho trang web
-* [HTML-CSS-JS] - Bộ ba công nghệ web, hiện thức hóa giao diện, dùng thêm bản mở rộng SCSS
+| ID   | Actor Name            | Description |
+|:----:|------------------------|-------------|
+| AC1  | Unauthenticated User  | A visitor who browses the website without logging in. Can only view products, store information, and blog posts. |
+| AC2  | Authenticated User    | A customer with an account who can purchase products, add to cart or wishlist, and edit personal information. |
+| AC3  | Staff                 | A staff member with an account issued by the admin. Can manage orders, handle reviews, update statuses, and manage posts. |
+| AC4  | Administrator         | The highest authority. Can manage users, orders, staff, products, security, and assign roles. |
 
-  
-## Tổng hợp link các github
-* [FE_USER](https://github.com/ptvmarch26/setup_react)
-* [FE_ADMIN](https://github.com/ThanhTuynn/IE104_FE_Admin)
-* [BE](https://github.com/FirstOne2308/Backend_ThuCung)
+## ✅ Features & Completion Status
+
+### UC1. Sales Management
+
+| Code    | Feature                            | Actor              | Status |
+|---------|------------------------------------|---------------------|--------|
+| UC1.01  | Manage Products                    | Admin               | 100%   |
+| UC1.02  | Search Products                    | Unauthenticated User| 100%   |
+| UC1.03  | View Product Details               | Unauthenticated User| 100%   |
+| UC1.04  | Add to Cart                        | Authenticated User  | 100%   |
+| UC1.05  | View Cart                          | Authenticated User  | 100%   |
+| UC1.06  | Add to Wishlist                    | Authenticated User  | 100%   |
+| UC1.07  | View Wishlist                      | Authenticated User  | 100%   |
+| UC1.08  | Buy Now                            | Authenticated User  | 100%   |
+| UC1.09  | Place Order                        | Authenticated User  | 100%   |
+| UC1.10  | Checkout                           | Authenticated User  | 100%   |
+| UC1.11  | Review Products                    | Authenticated User  | 100%   |
+| UC1.12  | Manage Reviews                     | Staff, Admin        | 100%   |
+| UC1.13  | View Products                      | Unauthenticated User| 100%   |
+
+### UC2. Inventory Management
+
+| Code    | Feature                            | Actor              | Status |
+|---------|------------------------------------|---------------------|--------|
+| UC2.01  | Add New Product                    | Admin, Staff        | 100%   |
+| UC2.02  | Edit Product Quantity              | Admin, Staff        | 100%   |
+| UC2.03  | Check Inventory                    | Admin, Staff        | 100%   |
+| UC2.04  | Delete Inventory Items             | Admin, Staff        | 100%   |
+
+### UC3. Customer Management
+
+| Code    | Feature                            | Actor                             | Status |
+|---------|------------------------------------|-----------------------------------|--------|
+| UC3.01  | Register                           | Unauthenticated User              | 100%   |
+| UC3.02  | Login                              | Unauthenticated, Admin, Staff     | 100%   |
+| UC3.03  | Change Password                    | Unauthenticated, Admin, Staff     | 100%   |
+| UC3.04  | Edit Profile                       | Unauthenticated, Admin, Staff     | 100%   |
+| UC3.05  | View Profile                       | Unauthenticated, Admin, Staff     | 100%   |
+| UC3.06  | Delete Violating Accounts          | Admin, Staff                      | 100%   |
+| UC3.07  | Forgot Password                    | Unauthenticated, Admin, Staff     | 100%   |
+
+### UC4. Order Management
+
+| Code    | Feature                            | Actor                             | Status |
+|---------|------------------------------------|-----------------------------------|--------|
+| UC4.01  | Confirm Orders                     | Staff, Admin                      | 100%   |
+| UC4.02  | Cancel Orders                      | Authenticated, Staff, Admin       | 100%   |
+| UC4.03  | Request Return                     | Authenticated User                | 0%     |
+| UC4.04  | Process Return                     | Staff, Admin                      | 0%     |
+| UC4.05  | View Order Status                  | Authenticated, Staff, Admin       | 100%   |
+| UC4.06  | Update Order Status                | Staff, Admin                      | 100%   |
+
+### UC5. Revenue Management
+
+| Code    | Feature                            | Actor              | Status |
+|---------|------------------------------------|---------------------|--------|
+| UC5.01  | View Revenue                       | Admin               | 50%    |
+| UC5.02  | View Transaction History           | Admin               | 50%    |
+
+### UC6. Staff Management
+
+| Code    | Feature                            | Actor              | Status |
+|---------|------------------------------------|---------------------|--------|
+| UC6.01  | Add Staff                          | Admin               | 100%   |
+| UC6.02  | Remove Staff                       | Admin               | 0%     |
+| UC6.03  | Edit Staff                         | Admin               | 100%   |
+| UC6.04  | View Staff Information             | Staff, Admin        | 100%   |
+
+### UC7. Store Information Management
+
+| Code    | Feature                            | Actor              | Status |
+|---------|------------------------------------|---------------------|--------|
+| UC7.01  | Update Store Info                  | Admin               | 100%   |
+| UC7.02  | Update Admin Info                  | Admin               | 100%   |
+
+## 🧰 Technologies Used
+
+- [Node.js] – Backend & API handling  
+- [React.js] – Frontend framework  
+- [Express.js] – Web framework for Node.js  
+- [MongoDB Compass] – GUI for MongoDB database  
+- [MongoDB] – NoSQL database used for storing site data  
+- [HTML-CSS-JS] – Core web technologies (includes SCSS extension for styling)
+
+## 🛠 Installation Guide
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (version 16+ recommended)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [MongoDB](https://www.mongodb.com/) running locally or hosted (e.g. MongoDB Atlas)
+
+---
+
+### 1. Install the necessary applications as required 
+### 2. Clone the repositories
+
+```bash
+# Frontend for Users
+git clone https://github.com/ptvmarch26/setup_react.git
+
+# Frontend for Admin
+git clone https://github.com/ThanhTuynn/IE104_FE_Admin.git
+
+# Backend
+git clone https://github.com/FirstOne2308/Backend_ThuCung.git
+```
+### 3. Run npm install to download the necessary packages for the application
+### 4. Add [.env](https://docs.google.com/document/d/1erLAsHdnt3dNjXRLS7huo5bF3y4j8wOBqGT6nTeseu4/edit?tab=t.0) to the backend folder
+### 5. Run npm start in the terminal of each folder
+### 6. Open the website with the following accounts:
+- User: (clone the code for FE_User and BE)
+  - Phone number: 0123456789
+  - Password: 123456789
+- Admin: (clone the code for FE_Admin and BE)
+  - Username: admin123
+  - Password: admin12345
